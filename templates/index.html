@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!--<script-->
+			  <!--src="http://code.jquery.com/jquery-3.3.1.slim.js"-->
+			  <!--integrity="sha256-fNXJFIlca05BIO2Y5zh1xrShK3ME+/lYZ0j+ChxX2DA="-->
+			  <!--crossorigin="anonymous"></script>-->
+    <style type="text/css">
+              @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry"></script>
+<!-- Put this script tag to the <head> of your page -->
+<script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
+    <title>LandProber</title>
+</head>
+<body>
+
+
+    <div id="header">
+        <header>
+        <div id="logo">UCLAB</div>
+        <div id="language" style="font-family: 'Roboto';">
+            <div id="RU" class="lng">Рус</div>
+            <div id="EN" class="lng">Eng</div>
+        </div>
+        </header>
+
+        <h1 style="padding-top: 12%;font-size: 2.7rem;margin: 0;font-family: 'Ubuntu', sans-serif;">LandProber</h1>
+        <h2 style="font-size: 1.1em;font-family: &quot;Open SANS&quot;, SANS-SERIF;">
+            Зонд космической оценки землепользования<br>(озелененность территории)
+        </h2>
+
+        <div id="headInstruction">
+            <div id="topInstruction" style="font-size: 1em;/* text-shadow: 2px 2px 1px black; */padding-top: 7%;">
+                <div style="display: flex;justify-content: center;-webkit-margin-before: 3em;">
+                    <h3 style="FONT-FAMILY: &quot;Play&quot;;font-size: 1em;">
+                        Космический аппарат готов к работе
+                    </h3>
+                    <div class="indicator">
+
+                    </div>
+                </div>
+                <p style="FONT-FAMILY:  &quot;Comfortaa&quot;">
+                    Для начала работы со спутником, укажите квадрат поиска - введите адрес
+                </p>
+            </div>
+            <div id="topInput">
+                    <input id="pac-input-top" class="controls" type="text" placeholder="Enter a location" autocomplete="off">
+                    <div id="checkBtn" class="btn">ПОКАЗАТЬ</div>
+            <div class="pac-container pac-logo" style="display: none; width: 398px; position: absolute; left: 142px; top: 797px;"></div><div class="pac-container pac-logo" style="width: 398px; position: absolute; left: 304px; top: 557px; display: none;"></div></div>
+        </div>
+    </div>
+
+    <div id="mapWrapper" class="mapContainer">
+        <input id="pac-input" class="controls" type="text" placeholder="Enter a location">
+        <div id='map' ></div>
+
+        <div id="mapContent">
+            <div id="slideBtn" class="show">Скрыть</div>
+            <div id="panel">
+                    <div id="steps">
+                        <h4 style="font-family: 'Play'; font-size: 1.2em;">
+                            Внимание! <br>
+                            Проверьте квадрат поиска
+                        </h4>
+                        <p style=" font-family: Comfortaa; font-size: 0.95em; -webkit-margin-after: 1.8em; color: black;">
+                        Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.
+                        </p>
+                        <!--<p>Кнопка "Получить" находится над картой.</p>-->
+                    </div>
+                <p style="font-family: 'open sans'"></p>
+                    <div id="submitBtn" class="btn">Получить</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div id="rights"></div>
+        <div id="comment" style="display: flex;">
+            <a href="123">Оставить отзыв о сайте </a>
+            <img src="static/css/icons/comments.png" style="margin-left: 5px;">
+        </div>
+    </footer>
+</body>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script async src="{{ url_for('static', filename = 'js/script.js') }}"></script>
+</html>

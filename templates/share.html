@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry"></script>
+
+    <title>LandProber</title>
+</head>
+<body>
+    <header style="margin-top: 1%; position: inherit; display: flex; justify-content: space-between; transition: 0.6s;">
+        <div id="logo" class="heart">
+            <a href="/" title="На главную" style="color: white; -webkit-text-stroke: 0.2px #8004be;">UCLAB</a>
+        </div>
+        <div id="language">
+            <div id="RU" class="lng">Рус</div>
+            <div id="EN" class="lng">Eng</div>
+        </div>
+    </header>
+
+    <!--<div id="header">-->
+        <!--<h1 style="    padding-top: 16%; font-size: 5rem; margin: 0;">LandProber</h1>-->
+        <!--<h2 style="font-size: 1.8em;">Зонд космической оценки землепользования (озелененность территории)</h2>-->
+    <!--</div>-->
+
+    <div class="container" style="height: 100%!important; width: 100%!important">
+        <div class="item-1"></div>  <div class="item-2"></div>
+        <div class="item-3"></div>  <div class="item-4"></div>
+        <div class="item-5"></div>
+    </div>
+
+    <div id='mapResultWrapper' >
+        <div id='map2'></div>
+        <div id="info"></div>
+    </div>
+
+    {%if res%}
+        <script type=text/javascript>
+            //var zoom = 19.8
+            //var map
+            //var cropSize = 25
+            $(window).on('load',function(){
+                $('.container').css({display: 'flex'});
+                $('#mapResultWrapper').css({display: 'none'});
+                var result = JSON.parse({{res|tojson}})
+                window.resultGlobal = result;
+                window.lang = '{{lng}}';
+                var position =  {lat: Number(result['lat']), lng: Number(result['lon'])};
+                window.map2 = new google.maps.Map(document.getElementById('map2'), {zoom: 18, center: position});
+                window.map2.setMapTypeId('hybrid');
+                $('.container').css({display: 'none'});
+                google.maps.event.addListenerOnce(window.map2,"projection_changed", function() {
+                    var area = drawResult(window.map2, result)
+                    window.Area = area;
+                    $('#mapResultWrapper').css({display: 'flex'});
+                    changeLanguage('{{lng}}');
+                //insertInfo(window.resultGlobal, window.Area, window.lang);
+                $('#info_list').css({height: '90%'})
+                $('#mapResultWrapper').css({'margin-top': '1%'});
+                $('#info_list').css({'overflow-y': 'hidden', 'height': '100%'})
+                });
+
+            });
+        </script>
+    {%endif%}
+    <footer>
+        <div id="rights"></div>
+        <div id="comment" style="display: flex;">
+            <a href="123">Оставить отзыв о сайте </a>
+            <img src="../static/css/icons/comments.png" style="margin-left: 5px;">
+        </div>
+    </footer>
+</body>
+
+    <script async defer src="https://apis.google.com/js/platform.js" ></script>
+<script async defer  src="{{ url_for('static', filename = 'js/script.js') }}"></script>
+
+</html>
