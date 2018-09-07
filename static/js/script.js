@@ -1,3 +1,4 @@
+// global variables
 var zoom = 19.8
 var map, map2, rectangeMap1, globalLat, globalLon, cropSize, requestAddress, lang, resultGlobal, Area
 lang = 'RU'
@@ -8,51 +9,53 @@ $('document').ready(function(){
 //console.log("document ready");
 var h = $(window).height();
 var w = $(window).width();
-console.log('h=',h,'w=',w)
-//$("#helloMenu").css({});
-//$('.step').css({width: Number(w/3), height: Number(h/2)});
+// console.log('h=',h,'w=',w)
+
 $("html, body").animate({scrollTop: 0 }, 100);
-//$("#map").css({width: 1920, height: 1080});
+// try get geolocation
 if( $('#submitBtn').length ){
     var lng = 48.707067
     var lat = 44.5169033
     //console.log('geolocation before', lat, lng)
-    // У navigator.geolocation и у Google разные lat и lon
+    // navigator.geolocation get coords
     if (navigator.geolocation){
         navigator.geolocation.getCurrentPosition(function(position){
             lat = position.coords.latitude;
             lng = position.coords.longitude;
-            console.log('OK geolacation after', lat, lng)
         })
     }
 
     // Поэтому меняются местами lat и lng
     window.globalLat = lng
     window.globalLon = lat
-    console.log('google lat', lat, 'lng', lng)
 
+    // Init Google map
     var location = {lat: Number(lng), lng: Number(lat)};
     map = new google.maps.Map(
           document.getElementById('map'), {zoom: 18, center: location});
     map.setMapTypeId('hybrid');
+    // Inputs for geocoding
     setGeoCoder(window.map, 'pac-input', true);
     setGeoCoder(window.map, 'pac-input-top', false);
-    //addressInputElement.parent()
-
+    // set inputs for different blocks
     initializeInputAddress('#pac-input', '#mapWrapper');
     initializeInputAddress('#pac-input-top', '#topInput');
-    //sentRequest('#submitBtnTop');
+    // init button for request
     sentRequest('#submitBtn');
+    // scroll
     $('#checkBtn').click(function(){
-        $("html, body").scrollTop($("#mapWrapper").offset().top, 200);
+    var scr = $("#mapWrapper").offset().top + $('body').scrollTop()
+        $("html, body").animate({scrollTop: scr}, 1200);
     })
     slideBtn();
 }
+    // set text for footer
     $("#rights").text("© "+(new Date()).getFullYear()+" ALL RIGHTHS RESERVED, " )
-    $('#rights').append($('<a style="color: grey;" href="LINK_TO_UCLAB">UCLAB</a>'))
+    $('#rights').append($('<a style="color: grey;" href="/</a>'))
 
 
      var headerSize = 100;
+     // animation header
      $('body').scroll(function() {
           if ( document.body.scrollTop >= headerSize ) {
                $('header').addClass('opacity');
@@ -63,18 +66,18 @@ if( $('#submitBtn').length ){
                 $('#logo').removeClass('heart');
             }
     });
-
+    // language change
     $('.lng').click(function(){
         if (window.lang != $(this).attr('id')){
                 window.lang = $(this).attr('id')
             //функция, которая заменяет все
             changeLanguage(window.lang);
         }
-        //if (window.resultGlobal != ""){insertRequesstList(window.resultGlobal['requests']);}
     })
-
+    $('#RU').addClass('lang-text')
 });
 
+// set inputs for different blocks
 function initializeInputAddress(id, parentId){
     var addressInputElement = $(id);
     $('.pac-container').css({display: 'none'})
@@ -90,6 +93,7 @@ function initializeInputAddress(id, parentId){
         pacContainer.css({display: 'none'})
     })
 }
+
 function slideBtn(){
     $('#slideBtn').click(function(){
         if ( this.className == 'hide' ){
@@ -109,30 +113,28 @@ function slideBtn(){
     })
 }
 
-
 function sentRequest(buttonId){
     $(buttonId).click(function(){
+    // get coords
     var lat = window.globalLat
     var lon = window.globalLon
     var location, bounds
     var destination = $(window).height()
 
-
-
+    // if it first request by user
     if ($('#map2').length == 0){
+        // add preloader
         $('#panel').append($('<div class="container"><div class="item-1"></div><div class="item-2"></div><div class="item-3"></div><div class="item-4"></div><div class="item-5"></div></div>'))
-        $('footer').before($("<div id='mapResultWrapper' > <div id='map2'> </div> </div>"))
+        $('footer').before($("<div id='mapResultWrapper' > <div id='map2'> </div> </div>")) // wrapper for result map
         $('#mapResultWrapper').append($('<div id="info"></div>'))
 
-        //$('#map2').css({height: $('#map').height, width: '70%'});
     }
     $('#mapResultWrapper').css({display: 'none'})
 
     $('.container').css({display: 'flex'});
 
         //post coordinates to server
-        console.log('post latLng to server', window.globalLat, window.globalLon)
-        if (!window.requestAddress){
+        if (!window.requestAddress){ // if dont have a geoloc coords
                 window.requestAddress = "Неизвестный адрес"
             }
         $.post('/', {'lat': window.globalLat, 'lon': window.globalLon, 'address': window.requestAddress} ,function(result){
@@ -140,7 +142,7 @@ function sentRequest(buttonId){
             var lng = Number(result['lon'])
             var location = {lat: Number(lat), lng: Number(lng)};
             window.resultGlobal = result
-            if (!window.map2){
+            if (!window.map2){ // initialize result map
                 window.map2 = new google.maps.Map(
                           document.getElementById('map2'), {zoom: 17, center: location});
                 window.map2.setMapTypeId('satellite');
@@ -148,23 +150,22 @@ function sentRequest(buttonId){
                 window.map2.addListener("click", function (event) {
                     var latitude = event.latLng.lat();
                     var longitude = event.latLng.lng();
-                    console.log( latitude + ', ' + longitude );
-                    console.log('zoom = ', map2.getZoom())
+                    // console.log( latitude + ', ' + longitude );
+                    // console.log('zoom = ', map2.getZoom())
                     latLng = new google.maps.LatLng(Number(latitude), Number(longitude));
                     getPixelCoordinates(latLng, zoom);
                     //console.log('fromLatLngToPoint', fromLatLngToPoint(latLng, map2))
                 })
 
-                //$('#requests').after($('<div id="info"></div>'))
-
             }
+            // form links for share
             var url_share = window.location.href+'share/lat:'+lat+'_lon:'+lon+"&ln="+window.lang;
             var google_share = '<a href="https://plus.google.com/share?url={'+url_share+'}" onclick="shareGoogle()"><img src="https://www.gstatic.com/images/icons/gplus-32.png" alt="Share on Google+"/></a>'
 
-            var area = drawResult(window.map2, result); //Возвращает площадь 1 маленького квадрата
-            window.Area = area;
+            drawResult(window.map2, result); //Возвращает площадь 1 маленького квадрата
+            //window.Area = area;
             $('#info').empty()
-            insertInfo(result, area, window.lang);
+            insertInfo(result, window.Area, window.lang);
             insertRequesstList(result['requests']);
             share_text = ""
             if (window.lang == 'RU'){share_text = '<p>Поделиться</p>'} else{share_text = '<p>Share</p>'}
@@ -179,33 +180,29 @@ function sentRequest(buttonId){
             $('#share').css('justify-content: center');
 
             $('#mapResultWrapper').css({display: 'flex'});
-            $("body").scrollTop($("#mapResultWrapper").offset().top , 1200);
+            $("body").animate({scrollTop: $("#mapResultWrapper").offset().top + $('body').scrollTop()}, 1200);
         }).fail(function() {
-            $post('/error')
-            $('#header').empty()
-            $('#mapWrapper').remove
-            $('#header').append($(' <h1 style="    padding-top: 10%; font-size: 5rem; margin: 0;">LandProber</h1>'+
-                '<h3 style="font-size: 1.8em;">Зонд космической оценки землепользования (озелененность территории)</h3>'+
-                '<h3>Просим прощения. Возникли проблемы на сервере.<br>Sorry. We are have problems with server.</h3>'));
+            $.post('/error', {'descr': 'Невозможно выполнить запрос</br> Can\'t make request to server'})
         });
-
     })
 }
+// form link for google
 function shareGoogle(){
-javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
+    javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
 return false;
 }
 
 function drawResult(map, json){
     var lat = Number(json['lat'])
     var lng = Number(json['lon'])
-    console.log('drawRes', lat, lng)
-    var area;
+    // console.log('drawRes', lat, lng)
+    // var area;
     var latLng = new google.maps.LatLng(lat, lng)
+    // get coords for big rectangle - area
     var boundsOfRect = getBoundsOfArea(latLng, map)
         var pixRecX = (boundsOfRect['f']['f'] - boundsOfRect['f']['b']) / (2500/cropSize)
         var pixRecY = (boundsOfRect['b']['f'] - boundsOfRect['b']['b']) / (2500/cropSize)
-        console.log('pixX', pixRecX, 'pixY', pixRecY)
+        // console.log('pixX', pixRecX, 'pixY', pixRecY)
 
                 var areaPoints = [
             new google.maps.LatLng(lat, lng),
@@ -213,12 +210,12 @@ function drawResult(map, json){
             new google.maps.LatLng(lat-pixRecX, lng),
             new google.maps.LatLng(lat-pixRecX, lng-pixRecY)]
 
-         area = google.maps.geometry.spherical.computeArea(areaPoints)
+         //area = google.maps.geometry.spherical.computeArea(areaPoints)
 
 
 //lat увеличивается снизу-вверх - ось Y значит не обнуляется в цикле
 //lon увеличивается слева-направо - ось Х - значит обнуляется каждый цикл
-
+        // draw all rectangles
         var leftTopY = lng + 50*pixRecY // не обнуляется
         for( var i = 99; i >= 0; i--){
             var leftTopX = lat - 48*pixRecX // обнуляется каждый цикл
@@ -229,7 +226,7 @@ function drawResult(map, json){
                     east:  leftTopY,
                     west:  leftTopY - pixRecY
                     }
-
+                // if result in this coord
                 if (json[+(i)+':'+(j)]['delta']){
                     color = json[+(i)+':'+(j)]['color']
                     addRectangle(map, bounds, color)
@@ -242,13 +239,16 @@ function drawResult(map, json){
         map.setZoom(18);
         map.setCenter({lat: lat, lng: lng});
         $('.container').css({display: 'none'});
-        return area;
+        // return area;
 }
 
+// insert info to result block
 function insertInfo(result, area, lang){
-    //console.log('area = ', area)
-    var commonObjCount = (2500 / window.cropSize) * (2500 / window.cropSize)  //сетка
-    console.log(commonObjCount)
+    // console.log('area = ', area)
+
+    var commonObjCount = Math.pow(2500 / window.cropSize, 2) //сетка
+    var oneSegmentArea = area / commonObjCount
+    // console.log(commonObjCount)
     var enToRu = {'tree': 'Деревья'};
     var lng = 0;
     var Abin = [['Плохие условия', 'Bad'], ['Хорошие условия', 'Good'], ['Отличные условия', 'Exellent'] ]
@@ -266,31 +266,28 @@ function insertInfo(result, area, lang){
                   ['Последние запросы', 'Last requests' ]];
     $('#info h4').remove();
     $('#info_list').remove();
-    $('#info').prepend($('<h4>'+dictionary[0][lng]+'</h4>'))
+    $('#info').prepend($('<h4 style="-webkit-margin-after: 0em;">'+dictionary[0][lng]+'</h4>'))
     $('#info h4').after($('<div id="info_list" ></div>'))
     path_img = 'static/css/icons/'
     if ( !$('#mapWrapper').length ){
         path_img = '../' + path_img;
     }
-    console.log(path_img)
-    $('#info_list').append($('<p><img src="'+path_img+'grid.png">'+dictionary[1][lng]+(area*commonObjCount*1000000).toFixed(2)+ '</p>'))
+    // console.log(path_img)
+    $('#info_list').append($('<p><img src="'+path_img+'grid.png">'+dictionary[1][lng]+area.toFixed(2)+ ' m<sup><small>2</small></sup></p>'))
     $('#info_list').append($('<p><img src="'+path_img+'frames.png">'+dictionary[2][lng]+ result['objects']['tree']['count']+'</p>'));
     $('#info_list').append($('<p><img src="'+path_img+'forest.png">'+dictionary[3][lng]+
-            (result['objects']['tree']['count']*area * 1000000).toFixed(2)+ '</p>'));
-    var abinVal = ((result['objects']['tree']['count']*area)/(commonObjCount*area)).toFixed(2)
-    console.log('abin', abinVal)
+            (result['objects']['tree']['count']*oneSegmentArea).toFixed(2)+ ' m<sup><small>2</small></sup></p>'));
+    var abinVal = ((result['objects']['tree']['count']*oneSegmentArea)/(area)).toFixed(2)
+
     var abinText;
-    if ( abinVal < 0.1){
-        abinText = Abin[0][lng];
-    }
-    else if (abinVal >= 0.1 && abinVal < 0.6){
-        abinText = Abin[1][lng];
-    }
+
+    if ( abinVal < 0.1){ abinText = Abin[0][lng];}
+    else if (abinVal >= 0.1 && abinVal < 0.6){ abinText = Abin[1][lng];}
     else {abinText = Abin[2][lng];}
     $('#info_list').append($('<p><img src="'+path_img+'quality.png">'+dictionary[4][lng]+
          abinVal    + ' (Abin) - ' + abinText + '</p>'));
-    $('#info_list').append($('<p><img src="'+path_img+'forest.png">'+dictionary[5][lng] +
-        Math.round((result['objects']['tree']['count']*area*1000000)/(1.18)) + '</p>'))
+    $('#info_list').append($('<p><img src="'+path_img+'tree.png">'+dictionary[5][lng] +
+        Math.round((result['objects']['tree']['count']*oneSegmentArea)/(10.7)) + '</p>'))
     $('#info_list').append($('<p><img src="'+path_img+'tree-silhouette.png">'+dictionary[6][lng]+'</p>'))
     if ( !$('#newRequest').length && $('#mapWrapper').length ){
         $('#info_list').after($("<div id='newRequest' class='btn' style='width: 100%; margin-top: 1%;'>"+dictionary[7][lng]+"</div>"))
@@ -302,29 +299,25 @@ function insertInfo(result, area, lang){
     if (!window.location.href.includes('share')){
         $('#newRequest').after($('<h4>'+(dictionary[8][lng])+'</h4>'));
     }
-
-
 }
 
 function insertRequesstList(list){
-    console.log(list)
+    // console.log(list)
     var text;
     if (window.lang == "RU"){text = 'Последние запросы'}
     else{text = 'Last requests'}
     if ( $('#map2').length != 0 ){
         $('#info').append($("<div id='requests'></div>"));
         for ( el in list ){
-            console.log('el',el);
             $('#requests').append($('<div class="request_line"><div class="request">'+list[el][0]+'</div><div class="request">'+list[el][1]+'</div></div>'))
         }
-        //$('v').before($('<div id="requests"><h2 style="width: 100%;">Последние запросы</h2></div>'));
     }
 }
 
 
 //изобразить квадрат на карте
 function addRectangle(map, bounds, color){
-console.log('rectangle added')
+// console.log('rectangle added')
 var rectangle = new google.maps.Rectangle({
           strokeColor: color,
           strokeOpacity: 0.0,
@@ -335,6 +328,7 @@ var rectangle = new google.maps.Rectangle({
           bounds: bounds
         });
 }
+
 function fromLatLngToPoint(latLng, map) {
 	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
 	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
@@ -358,33 +352,28 @@ function project(latLng) {
         // Truncating to 0.9999 effectively limits latitude to 89.189. This is
         // about a third of a tile past the edge of the world tile.
         siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+        var x = (TILE_SIZE * (0.5 + latLng.lng() / 360))
+        var y = (TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI)))
 
         return new google.maps.Point(
-            TILE_SIZE * (0.5 + latLng.lng() / 360),
-            TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI)));
+            x,
+            y );
 }
 
 function getBoundsOfArea(center, map){
-    var imgSize = 1650
+    var imgSize = 1675
     var scale = Math.pow(2,zoom);
 
     var proj = map.getProjection();
-    console.log('map in bounds', map, 'center', center, 'proj', proj);
+    // console.log('map in bounds', map, 'center', center, 'proj', proj);
     var wc = proj.fromLatLngToPoint(center);
     var bounds = new google.maps.LatLngBounds();
     var sw = new google.maps.Point(((wc.x * scale) - imgSize)/ scale, ((wc.y * scale) - imgSize)/ scale);
     bounds.extend(proj.fromPointToLatLng(sw));
     var ne = new google.maps.Point(((wc.x * scale) + imgSize)/ scale, ((wc.y * scale) + imgSize)/ scale);
     bounds.extend(proj.fromPointToLatLng(ne));
-//    var opts = {
-//        bounds: bounds,
-//        strokeOpacity: 0.8,
-//        fillColor: '#A8E4A0',
-//        strokeColor: '#A8E4A0',
-//        map: map,
-//        editable:false
-//    }
-    console.log('bound of Big rectangle', bounds)
+
+    // console.log('bound of Big rectangle', bounds)
     //var rect = new google.maps.Rectangle(opts);
     return bounds
 }
@@ -437,16 +426,50 @@ var input = document.getElementById(id);
                   window.alert('Geocoder failed due to: ' + status);
                   return;
                 }
-                map.setZoom(17);
+                //map.setZoom(17);
 
                 map.setCenter(results[0].geometry.location);
                  window.requestAddress = results['0'].formatted_address
                  lat = results[0].geometry.location.lat();
                  lng = results[0].geometry.location.lng();
 
+                 // get center of tile
+                 //
+                 //
+                 var scale = 1 << 20;
+                var tileSize = 256
+                var worldCoordinate = project(new google.maps.LatLng(lat, lng));
+                // set lat lng to center of tile
+                var tileCoordinate = new google.maps.Point(
+                    Math.floor(worldCoordinate.x * scale / tileSize),
+                    Math.floor(worldCoordinate.y * scale / tileSize));
+                 pixels_x = worldCoordinate.x * scale
+                 pixels_y = worldCoordinate.y * scale
+                 pixels_x = (Number((pixels_x - pixels_x%tileSize).toFixed(0)) + 128) / scale
+                 pixels_y = (Number((pixels_y - pixels_y%tileSize).toFixed(0)) + 128) / scale
+                 var testCoord = new google.maps.Point(pixels_x, pixels_y)
+                 lat = window.map.getProjection().fromPointToLatLng(testCoord).lat()
+                 lng = window.map.getProjection().fromPointToLatLng(testCoord).lng()
+
+//                 var marker = new google.maps.Marker({
+//                   position: new google.maps.LatLng(lat, lng),
+//                   map: window.map,
+//                   title: 'center latlng'
+//                 });
+                 //
+                 //
+                 //
                 // Set the position of the marker using the place ID and location.
 
                 var boundsOfArea = getBoundsOfArea(new google.maps.LatLng(Number(lat), Number(lng)), window.map)
+
+                var path = [ new google.maps.LatLng(boundsOfArea.f.f,  boundsOfArea.b.f),
+                    new google.maps.LatLng(boundsOfArea.f.f,  boundsOfArea.b.b),
+                ]
+
+                var dist = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
+                window.Area = dist * dist
+                // bounds: boundsOfArea,
                 var opts = {
                     bounds: boundsOfArea,
                     strokeOpacity: 0.8,
@@ -464,10 +487,19 @@ var input = document.getElementById(id);
                 window.globalLat = lat
                 window.globalLon = lng
 
-                console.log('coords latLng changed', window.globalLat, window.globalLon)
+                // console.log('coords latLng changed', window.globalLat, window.globalLon)
           });
         });
 }
+//
+//function point2LatLng(point, map) {
+//  var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+//  var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+//  var scale = Math.pow(2, map.getZoom());
+//  var worldPoint = new google.maps.Point(point.x / scale + bottomLeft.x, point.y / scale + topRight.y);
+//  return map.getProjection().fromPointToLatLng(worldPoint);
+//}
+
 
 function changeLanguage(lang){
     $('#steps').empty();
@@ -477,6 +509,8 @@ function changeLanguage(lang){
     //$('#language').empty();
 
     if ( lang == "RU" ){
+        $('#RU').addClass('lang-text')
+        $('#EN').removeClass('lang-text')
         $('#steps').append($("<h4>Шаг2. Проверьте область классификации</h4>"+
                         "<p>Если зеленая область соответствует Вашему запросу, то перейдите к следующему шагу.</p>"+
                         '<h4>Шаг3. Нажмите "Получить"</h4>'+
@@ -493,6 +527,8 @@ function changeLanguage(lang){
         $('#comment > a').text('Оставить комментарий о сайте')
     }
     else{
+        $('#RU').removeClass('lang-text')
+        $('#EN').addClass('lang-text')
         $('#steps').append($("<h4>Step 2. Check the classification area</h4>"+
                         "<p>If the green area matches your query, go to the next step.</p>"+
                         '<h4>Step3. Click "GET"</h4>'+
@@ -509,18 +545,8 @@ function changeLanguage(lang){
         $('#comment > a').text('Stay comment about site')
 
     }
-//    $('.lng').click(function(){
-//        window.lang = $(this).attr('id')
-//        //функция, которая заменяет все
-//        changeLanguage(window.lang);
-//        if (window.resultGlobal != "" && $('#mapWrapper').length)
-//            {insertRequesstList(window.resultGlobal['requests']);}
-//    })
+
     if ( window.resultGlobal != ""){
             insertInfo(window.resultGlobal, window.Area, window.lang);
-            //insertRequesstList(window.resultGlobal['requests']);
-            //$('#newRequest').text('New request')
         }
-
-
 }

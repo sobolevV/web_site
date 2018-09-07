@@ -105,7 +105,7 @@ def classify(img_Src, tile_size, model, delta):
     #img_map = img_Src.crop((dif, dif, w-dif, h-dif))
     # img_Src = img_Src.crop((110, 115, w - 290, h - 128))
     img_map = img_Src.resize((2500, 2500))
-    img_map = normalization_image(img_map)
+    # img_map = normalization_image(img_map)
     print(img_map.size)
     #draw = ImageDraw.Draw(img_map)
     json_result = {}
