@@ -70,7 +70,7 @@ def get_map(filename, lat, lon, zoom, neighbourhood=7, threads=8):
             nx, ny = index % r_size, index // r_size
             image.paste(img, (img.size[0] * nx, img.size[0] * ny))
 
-    image.save(filename)
+    # image.save(filename)
     return image
 
 

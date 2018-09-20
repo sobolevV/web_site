@@ -182,7 +182,7 @@ function sentRequest(buttonId){
             $('#mapResultWrapper').css({display: 'flex'});
             $("body").animate({scrollTop: $("#mapResultWrapper").offset().top + $('body').scrollTop()}, 1200);
         }).fail(function() {
-            $.post('/error', {'descr': 'Невозможно выполнить запрос</br> Can\'t make request to server'})
+            $.post('/error', {'descr': 'Невозможно выполнить запрос<br> Can\'t make request to server'})
         });
     })
 }
