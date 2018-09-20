@@ -1,18 +1,12 @@
-from app.module.ya_maps import YandexMapParser
-#from keras.models import load_model
-#from keras.models import Model
 from keras.preprocessing import image
 import numpy as np
 import io
-import bs4 as bs
 import urllib.request
-from selenium import webdriver
 import re
 import time
 import numpy as np
 import cv2
-import time, schedule
-from app.module.get_tile import *
+from module.get_tile import *
 from PIL import Image, ImageDraw
 names = ['tree', 'grass', 'other' ]
 objects = ['#EA0F0F', '#FAE7B5', '#957B8D']
@@ -83,27 +77,9 @@ def normalization_image(src):
     cv2.imshow('namewef', out_img)
     return Image.fromarray(out_img, 'RGB')
 
-def getImage(lat, lon, proxy):
-    ya = YandexMapParser(width=2500, height=2500, proxy=proxy)
-    url = 'https://www.google.ru/maps/@{},{},350m/data=!3m1!1e3?hl=ru'.format(lat, lon)
-    r = ya.screenshot(url=url)
-    with open(f'image-res.png', 'wb') as f:
-        f.write(r)
-
-    return r
-
 def classify(img_Src, tile_size, model, delta):
 
-    #test = Image.fromarray(normalization_image(img_Src))
-    #img_map = Image.fromarray(normalization_image(img_Src))#Image.open(io.BytesIO(normalization_image(img_Src))).convert('RGB')#Image.frombytes(mode='RGB', size=(2500, 2500), data=io.BytesIO(img_Src))#Image.open(img_Src).convert('RGB')
-    #img_map = Image.frombytes("RGB", 2500, img_Src)
-    img_Src.save('newTest.png')
     w, h = img_Src.size
-    dif = (w - 2500)/2
-    #print(w, h)
-    #img_Src.save('newTest-beforeCrop.png')
-    #img_map = img_Src.crop((dif, dif, w-dif, h-dif))
-    # img_Src = img_Src.crop((110, 115, w - 290, h - 128))
     img_map = img_Src.resize((2500, 2500))
     # img_map = normalization_image(img_map)
     print(img_map.size)
@@ -148,50 +124,3 @@ def classify(img_Src, tile_size, model, delta):
     for i in range(len(objects)):
         json_result['objects'].update( { names[i]: {'color': objects[i], 'count': trees} } )
     return json_result
-
-def parseProxy():
-    url = 'http://free-proxy.cz/ru/proxylist/country/RU/http/ping/all' #'https://hidemy.name/ru/proxy-list/?country=RU#list'
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-
-    capabilities = webdriver.DesiredCapabilities.CHROME
-    # prox.add_to_capabilities(capabilities)
-
-    browser = webdriver.Chrome(executable_path='C:\\Users\\Vadim\\chrome_driver\\chromedriver.exe',
-                               desired_capabilities=capabilities, options=options)
-    # browser.set_window_size(2500, 2500)
-    browser.get(url)
-    time.sleep(5)
-    #script = """
-    #  window.setTimeout(click(), 6000);
-    # function click(){
-    #     document.getElementsByClassName('button button_green ')[0].click();
-    #     document.getElementById('t_h').click()
-    # }
-    #    """
-    script = """document.getElementById('frmsearchFilter-send').click()"""
-    try:
-        browser.execute_script(script)
-        print('execute script for parsing')
-    except Exception:
-        print('Function - parseProxy: Script didn\'t execute ')
-
-    time.sleep(3)
-    soup = bs.BeautifulSoup(browser.page_source, 'lxml')
-
-    #table = soup.body.table['proxy_list']
-    tr = soup.find_all('table')[1].find_all('tr')
-    proxy_list = []
-    for i in tr:
-        td = i.find_all('td')
-        if len(td) > 1:
-            row = [j.text for j in td]
-        #print(re.sub(r'\D', '', row[-4]))
-            if row[6] == 'прозрачный':
-                #print(re.sub(r'\D^.', '', row[0]) + ':' + row[1])
-                proxy_list.append(row[0].split(')')[-1] + ':' + row[1])
-                #print(proxy_list[-1])
-    print('proxy count = ', len(proxy_list))
-
-
-    return proxy_list

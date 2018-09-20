@@ -1,10 +1,17 @@
-from flask import Flask, render_template, request, jsonify, json, redirect, Blueprint
-from app.module import main
-from app.module.get_tile import get_map
-from keras.models import load_model
-import keras.backend as K
 from os import environ
 import keras.backend
+environ["KERAS_BACKEND"] = "theano"
+environ["MKL_THREADING_LAYER"] = "GNU"
+if keras.backend.backend() != 'theano':
+  raise BaseException("This script uses other backend")
+else:
+   keras.backend.set_image_dim_ordering('th')
+
+from flask import Flask, render_template, request, jsonify, json, redirect, Blueprint
+from module import main
+from module.get_tile import get_map
+from keras.models import load_model
+import keras.backend as K
 import os.path
 from math import fabs
 #import theano
@@ -12,12 +19,6 @@ import threading, time
 from multiprocessing.pool import ThreadPool
 app = Flask(__name__)
 
-environ["KERAS_BACKEND"] = "theano"
-environ["MKL_THREADING_LAYER"] = "GNU"
-if keras.backend.backend() != 'theano':
-  raise BaseException("This script uses other backend")
-else:
-   keras.backend.set_image_dim_ordering('th')
 model = load_model('module/new_model_25_bright.hdf5')
 error = Blueprint('error', __name__)
 
