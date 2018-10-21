@@ -4,78 +4,140 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename = 'icon.png') }}">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <!--<script-->
-			  <!--src="http://code.jquery.com/jquery-3.3.1.slim.js"-->
-			  <!--integrity="sha256-fNXJFIlca05BIO2Y5zh1xrShK3ME+/lYZ0j+ChxX2DA="-->
-			  <!--crossorigin="anonymous"></script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.js"></script>-->
+
     <style type="text/css">
               @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry"></script>
-<!-- Put this script tag to the <head> of your page -->
-<script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
+    <script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
     <title>LandProber</title>
 </head>
 <body>
 
-
-    <div id="header">
-        <header>
-        <div id="logo">UCLAB</div>
-        <div id="language" style="font-family: 'Roboto';">
-            <div id="RU" class="lng">Рус</div>
-            <div id="EN" class="lng">Eng</div>
-        </div>
+    <header>
+            <div id="logo">UCLAB</div>
+            <div class="row container">
+                <div class="ui simple dropdown item">
+                  More
+                  <i class="dropdown icon"></i>
+                  <div class="menu">
+                    <a class="item"><i class="edit icon"></i> Edit Profile</a>
+                    <a class="item"><i class="globe icon"></i> Choose Language</a>
+                    <a class="item"><i class="settings icon"></i> Account Settings</a>
+                  </div>
+                </div>
+                <div class="item">
+                    Санкт-Петербург
+                </div>
+            </div>
+            <div id="language" style="font-family: 'Roboto';">
+                <div id="RU" class="lng">Рус</div>
+                <div id="EN" class="lng">Eng</div>
+            </div>
         </header>
 
-        <h1 style="padding-top: 12%;font-size: 2.7rem;margin: 0;font-family: 'Ubuntu', sans-serif;">LandProber</h1>
-        <h2 style="font-size: 1.1em;font-family: &quot;Open SANS&quot;, SANS-SERIF;">
-            Зонд космической оценки землепользования<br>(озелененность территории)
-        </h2>
+    <!--<div id="header">-->
+        <!--<h1 style="padding-top: 12%;font-size: 2.7rem;margin: 0;font-family: 'Ubuntu', sans-serif;">LandProber</h1>-->
+        <!--<h2 style="font-size: 1.1em;font-family: &quot;Open SANS&quot;, SANS-SERIF;">-->
+            <!--Зонд космической оценки землепользования<br>(озелененность территории)-->
+        <!--</h2>-->
 
-        <div id="headInstruction">
-            <div id="topInstruction" style="font-size: 1em;/* text-shadow: 2px 2px 1px black; */padding-top: 7%;">
-                <div style="display: flex;justify-content: center;-webkit-margin-before: 3em;">
-                    <h3 style="FONT-FAMILY: &quot;Play&quot;;font-size: 1em;">
-                        Космический аппарат готов к работе
-                    </h3>
-                    <div class="indicator">
+        <!--<div id="headInstruction">-->
+            <!--<div id="topInstruction" style="font-size: 1em;/* text-shadow: 2px 2px 1px black; */padding-top: 7%;">-->
+                <!--<div style="display: flex;justify-content: center;-webkit-margin-before: 3em;">-->
+                    <!--<h3 style="FONT-FAMILY: &quot;Play&quot;;font-size: 1em;">-->
+                        <!--Космический аппарат готов к работе-->
+                    <!--</h3>-->
+                    <!--<div class="indicator">-->
 
-                    </div>
-                </div>
-                <p style="FONT-FAMILY:  &quot;Comfortaa&quot;">
-                    Для начала работы со спутником, укажите квадрат поиска - введите адрес
-                </p>
-            </div>
-            <div id="topInput">
-                    <input id="pac-input-top" class="controls" type="text" placeholder="Enter a location" autocomplete="off">
-                    <div id="checkBtn" class="btn">ПОКАЗАТЬ</div>
-            <div class="pac-container pac-logo" style="display: none; width: 398px; position: absolute; left: 142px; top: 797px;"></div><div class="pac-container pac-logo" style="width: 398px; position: absolute; left: 304px; top: 557px; display: none;"></div></div>
-        </div>
-    </div>
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<p style="FONT-FAMILY:  &quot;Comfortaa&quot;">-->
+                    <!--Для начала работы со спутником, укажите квадрат поиска - введите адрес-->
+                <!--</p>-->
+            <!--</div>-->
+            <!--<div id="topInput">-->
+                    <!--<input id="pac-input-top" class="controls" type="text" placeholder="Enter a location" autocomplete="off">-->
+                    <!--<div id="checkBtn" class="btn color_btn">ПОКАЗАТЬ</div>-->
+            <!--<div class="pac-container pac-logo" style="display: none; width: 398px; position: absolute; left: 142px; top: 797px;"></div><div class="pac-container pac-logo" style="width: 398px; position: absolute; left: 304px; top: 557px; display: none;"></div></div>-->
+        <!--</div>-->
+    <!--</div>-->
 
     <div id="mapWrapper" class="mapContainer">
         <input id="pac-input" class="controls" type="text" placeholder="Enter a location">
         <div id='map' ></div>
+        <div id="btn_container">
+            <div id="newRequest" class="btn">Новый запрос</div>
 
-        <div id="mapContent">
-            <div id="slideBtn" class="show">Скрыть</div>
-            <div id="panel">
-                    <div id="steps">
-                        <h4 style="font-family: 'Play'; font-size: 1.2em;">
-                            Внимание! <br>
-                            Проверьте квадрат поиска
-                        </h4>
-                        <p style=" font-family: Comfortaa; font-size: 0.95em; -webkit-margin-after: 1.8em; color: black;">
-                        Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.
-                        </p>
-                        <!--<p>Кнопка "Получить" находится над картой.</p>-->
-                    </div>
-                <p style="font-family: 'open sans'"></p>
-                    <div id="submitBtn" class="btn">Получить</div>
-            </div>
+            <div id="archive" class="btn">Архив запросов</div>
+            <div id="layers" class="btn">Слои</div>
         </div>
+        <!--menu for button-->
+        <div id="toolsContainer">
+             <div id="menu" class="hide" style="display: none;">
+                     <!--new request-->
+                 <div id="panel">
+                            <div id="steps">
+                                <h4 style="font-family: 'Play'; font-size: 1.2em;">
+                                    Внимание! <br>
+                                    Проверьте квадрат поиска
+                                </h4>
+                                <p style=" font-family: Comfortaa; font-size: 0.95em; -webkit-margin-after: 1.8em; color: black;">
+                                    Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.
+                                </p>
+                                <!--<p>Кнопка "Получить" находится над картой.</p>-->
+                            </div>
+                        <p style="font-family: 'open sans'"></p>
+                        <div id="submitBtn" class="btn color_btn">Получить</div>
+                        <input id="pac-input-bottom" class="controls" type="text" placeholder="Enter a location" autocomplete="off">
+                 </div>
+                 <!--archive of requests-->
+                    <div id='requests' style="height: 200px">
+
+                    </div>
+                 <!--choose classes-->
+                 <div id='classes' style="height: 200px">
+
+                    </div>
+             </div>
+            <!--button for info slider-->
+
+        </div>
+        <div id="right_panel"  >
+            <!--arrow btn-->
+            <div style="margin: 75px 10px;">
+                <div id="info_slider" >
+                    <img src='static/css/icons/arrow.png'>
+                </div>
+            </div>
+
+            <!--info slider block-->
+            <div id="info_container" class="info_hide">
+                <div id="info"></div>
+            </div>
+
+        </div>
+
+        <!--<div id="mapContent">-->
+            <!--<div id="slideBtn" class="show">Скрыть</div>-->
+            <!--<div id="panel">-->
+                    <!--<div id="steps">-->
+                        <!--<h4 style="font-family: 'Play'; font-size: 1.2em;">-->
+                            <!--Внимание! <br>-->
+                            <!--Проверьте квадрат поиска-->
+                        <!--</h4>-->
+                        <!--<p style=" font-family: Comfortaa; font-size: 0.95em; -webkit-margin-after: 1.8em; color: black;">-->
+                        <!--Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.-->
+                        <!--</p>-->
+                        <!--&lt;!&ndash;<p>Кнопка "Получить" находится над картой.</p>&ndash;&gt;-->
+                    <!--</div>-->
+                <!--<p style="font-family: 'open sans'"></p>-->
+                    <!--<div id="submitBtn" class="btn">Получить</div>-->
+            <!--</div>-->
+        <!--</div>-->
     </div>
 
     <footer>

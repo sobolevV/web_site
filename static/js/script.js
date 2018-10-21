@@ -13,11 +13,10 @@ var w = $(window).width();
 
 $("html, body").animate({scrollTop: 0 }, 100);
 // try get geolocation
+//submit btn start
 if( $('#submitBtn').length ){
     var lng = 48.707067
     var lat = 44.5169033
-    //console.log('geolocation before', lat, lng)
-    // navigator.geolocation get coords
     if (navigator.geolocation){
         navigator.geolocation.getCurrentPosition(function(position){
             lat = position.coords.latitude;
@@ -26,20 +25,15 @@ if( $('#submitBtn').length ){
     }
 
     // Поэтому меняются местами lat и lng
-    window.globalLat = lng
-    window.globalLon = lat
+//    window.globalLat = lng
+//    window.globalLon = lat
 
     // Init Google map
     var location = {lat: Number(lng), lng: Number(lat)};
     map = new google.maps.Map(
           document.getElementById('map'), {zoom: 18, center: location});
     map.setMapTypeId('hybrid');
-    // Inputs for geocoding
-    setGeoCoder(window.map, 'pac-input', true);
-    setGeoCoder(window.map, 'pac-input-top', false);
-    // set inputs for different blocks
-    initializeInputAddress('#pac-input', '#mapWrapper');
-    initializeInputAddress('#pac-input-top', '#topInput');
+
     // init button for request
     sentRequest('#submitBtn');
     // scroll
@@ -47,12 +41,27 @@ if( $('#submitBtn').length ){
     var scr = $("#mapWrapper").offset().top + $('body').scrollTop()
         $("html, body").animate({scrollTop: scr}, 1200);
     })
-    slideBtn();
+
+    $("#pac-input").css({display: 'none'});
+    //$("#menu").append()
+
+    // Inputs for geocoding
+    setGeoCoder(window.map, 'pac-input-bottom', false);
+    setGeoCoder(window.map, 'pac-input-top', false);
+    // set inputs for different blocks
+
+    initializeInputAddress('#pac-input-bottom', '#menu');
+    initializeInputAddress('#pac-input-top', '#topInput');
+    ////////////
+    console.log('nuuu')
 }
+    //$("#pac-input").remove();
+
+
+//submit button end------------------------------------------------
     // set text for footer
     $("#rights").text("© "+(new Date()).getFullYear()+" ALL RIGHTHS RESERVED, " )
     $('#rights').append($('<a style="color: grey;" href="/</a>'))
-
 
      var headerSize = 100;
      // animation header
@@ -75,8 +84,43 @@ if( $('#submitBtn').length ){
         }
     })
     $('#RU').addClass('lang-text')
+    /////init different functions
+    slideBtn();
+    slideInfo();
+    initButtons();
 });
 
+function initButtons(){
+    //slide menu
+    $('#btn_container > .btn').click(function(){
+        if( $("#menu").css("display") == "none" ){
+            $("#menu").css({display: 'block'});
+        }
+    //    check - if btn active -> check menu
+        if ($(this).hasClass('color_btn')){
+            if ( $('#menu').hasClass('hide') ){
+                $('#menu').removeClass('hide');
+                $('#menu').slideDown( 'slow' );
+                $('#menu').addClass('show')
+            }
+            else{
+                $('#menu').removeClass('show');
+                $('#menu').slideUp( 'slow' );
+                $('#menu').addClass('hide')
+                $(this).removeClass('color_btn')
+            }
+        }
+        else{
+            $('#btn_container > .btn').removeClass('color_btn')
+            $(this).addClass('color_btn')
+            $('#menu').removeClass('hide');
+            $('#menu').addClass('show')
+            $("#menu > div").css({display: "none"});
+            $('#menu').children().eq($(this).index()).css({display: "block"});
+        }
+
+    })
+}
 // set inputs for different blocks
 function initializeInputAddress(id, parentId){
     var addressInputElement = $(id);
@@ -84,8 +128,8 @@ function initializeInputAddress(id, parentId){
     addressInputElement.on('focus', function () {
          var pacContainer = $('.pac-container');
          $(parentId).append(pacContainer);
-         if (id == '#pac-input-top'){pacContainer.removeClass('test-pac'); pacContainer.css({top: '39px!important'})}
-         else {$('.pac-container').addClass('test-pac')} //css({top: '143px!important;'})}
+         if (id == '#pac-input-top'){pacContainer.removeClass('test-pac'); pacContainer.css({top: '40px!important'})}
+         else {pacContainer.addClass('test-pac')} //css({top: '143px!important;'})}
     })
     addressInputElement.focusout(function(){
         var pacContainer = $('.pac-container');//.remove();
@@ -113,77 +157,104 @@ function slideBtn(){
     })
 }
 
+function slideInfo(){
+    $('#info_slider').click(function(){
+    var right_panel = $('#right_panel');
+    var info_cont = $("#info_container");
+        if ( info_cont.hasClass('info_hide') ){
+
+            info_cont.removeClass('info_hide');
+            right_panel.animate({ width: '35%'}, 300);
+            info_cont.animate({ opacity: '1'}, 600);
+            info_cont.addClass('info_show');
+        }
+        else{
+            info_cont.removeClass('info_show');
+            info_cont.animate({ opacity: '0'}, 300);
+            right_panel.animate({ width: '60px'}, 600);
+            info_cont.addClass('info_hide');
+        }
+    })
+}
+
 function sentRequest(buttonId){
+
     $(buttonId).click(function(){
-    // get coords
-    var lat = window.globalLat
-    var lon = window.globalLon
-    var location, bounds
-    var destination = $(window).height()
 
-    // if it first request by user
-    if ($('#map2').length == 0){
-        // add preloader
-        $('#panel').append($('<div class="container"><div class="item-1"></div><div class="item-2"></div><div class="item-3"></div><div class="item-4"></div><div class="item-5"></div></div>'))
-        $('footer').before($("<div id='mapResultWrapper' > <div id='map2'> </div> </div>")) // wrapper for result map
-        $('#mapResultWrapper').append($('<div id="info"></div>'))
+        if ( Number(window.globalLat) &&  Number(window.globalLon))
+            {
+            // get coords
+            var lat = window.globalLat
+            var lon = window.globalLon
+            var location, bounds
+            var destination = $(window).height()
 
-    }
-    $('#mapResultWrapper').css({display: 'none'})
+            // if it first request by user
 
-    $('.container').css({display: 'flex'});
+                // add preloader
 
-        //post coordinates to server
-        if (!window.requestAddress){ // if dont have a geoloc coords
-                window.requestAddress = "Неизвестный адрес"
+            $('#info').empty();
+            //$('#mapResultWrapper').css({display: 'none'})
+
+            $('.container').css({display: 'flex'});
+
+                //post coordinates to server
+                if (!window.requestAddress){ // if dont have a geoloc coords
+                        window.requestAddress = "Неизвестный адрес"
+                    }
+                $.post('/', {'lat': window.globalLat, 'lon': window.globalLon, 'address': window.requestAddress} ,function(result){
+                    var lat = Number(result['lat'])
+                    var lng = Number(result['lon'])
+                    var location = {lat: Number(lat), lng: Number(lng)};
+                    window.resultGlobal = result
+        //            if (!window.map2){ // initialize result map
+        //                window.map2 = new google.maps.Map(
+        //                          document.getElementById('map2'), {zoom: 17, center: location});
+        //                window.map2.setMapTypeId('satellite');
+        //
+        //                window.map2.addListener("click", function (event) {
+        //                    var latitude = event.latLng.lat();
+        //                    var longitude = event.latLng.lng();
+        //                    // console.log( latitude + ', ' + longitude );
+        //                    // console.log('zoom = ', map2.getZoom())
+        //                    latLng = new google.maps.LatLng(Number(latitude), Number(longitude));
+        //                    getPixelCoordinates(latLng, zoom);
+        //                    //console.log('fromLatLngToPoint', fromLatLngToPoint(latLng, map2))
+        //                })
+        //
+        //            }
+                    // form links for share
+                    var url_share = window.location.href+'share/lat:'+lat+'_lon:'+lon+"&ln="+window.lang;
+                    var google_share = '<a href="https://plus.google.com/share?url={'+url_share+'}" onclick="shareGoogle()"><img src="https://www.gstatic.com/images/icons/gplus-32.png" alt="Share on Google+"/></a>'
+
+                    drawResult(window.map, result); //Возвращает площадь 1 маленького квадрата
+                    //window.Area = area;
+                    $('#info').empty();
+                    $('#share_links').remove();
+                    insertInfo(result, window.Area, window.lang);
+                    insertRequesstList(result['requests']);
+                    share_text = ""
+                    if (window.lang == 'RU'){share_text = '<p>Поделиться</p>'} else{share_text = '<p>Share</p>'}
+                    $('#info').after($("<div id='share_links'>"+share_text+"<div id='vk' class='link'>"+
+                            "</div><div id='google' class='link'></div>"+
+                            "<div id='facebook' class='link'><a href='https://www.facebook.com/sharer/sharer.php?u="+url_share+
+                                " target='_blank'><img src='static/css/icons/facebook.png'></a></div>"+
+                        "</div>"))
+                    $('#vk').html(VK.Share.button({url: url_share},
+                        {type: 'custom', text: "<img src='static/css/icons/vk.png'>"}))//'<img src=\"https://vk.com/images/share_32.png\" width=\"32\" height=\"32\" />'
+                    $('#google').html(google_share)
+                    $('#share').css('justify-content: center');
+
+                    $('#mapResultWrapper').css({display: 'flex'});
+                    //$("body").animate({scrollTop: $("#mapResultWrapper").offset().top + $('body').scrollTop()}, 1200);
+                }).fail(function() {
+                    $.post('/error', {'descr': 'Невозможно выполнить запрос<br> Can\'t make request to server'})
+                });
             }
-        $.post('/', {'lat': window.globalLat, 'lon': window.globalLon, 'address': window.requestAddress} ,function(result){
-            var lat = Number(result['lat'])
-            var lng = Number(result['lon'])
-            var location = {lat: Number(lat), lng: Number(lng)};
-            window.resultGlobal = result
-            if (!window.map2){ // initialize result map
-                window.map2 = new google.maps.Map(
-                          document.getElementById('map2'), {zoom: 17, center: location});
-                window.map2.setMapTypeId('satellite');
-
-                window.map2.addListener("click", function (event) {
-                    var latitude = event.latLng.lat();
-                    var longitude = event.latLng.lng();
-                    // console.log( latitude + ', ' + longitude );
-                    // console.log('zoom = ', map2.getZoom())
-                    latLng = new google.maps.LatLng(Number(latitude), Number(longitude));
-                    getPixelCoordinates(latLng, zoom);
-                    //console.log('fromLatLngToPoint', fromLatLngToPoint(latLng, map2))
-                })
-
+            else{
+                alert('Вы не выбрали место')
             }
-            // form links for share
-            var url_share = window.location.href+'share/lat:'+lat+'_lon:'+lon+"&ln="+window.lang;
-            var google_share = '<a href="https://plus.google.com/share?url={'+url_share+'}" onclick="shareGoogle()"><img src="https://www.gstatic.com/images/icons/gplus-32.png" alt="Share on Google+"/></a>'
-
-            drawResult(window.map2, result); //Возвращает площадь 1 маленького квадрата
-            //window.Area = area;
-            $('#info').empty()
-            insertInfo(result, window.Area, window.lang);
-            insertRequesstList(result['requests']);
-            share_text = ""
-            if (window.lang == 'RU'){share_text = '<p>Поделиться</p>'} else{share_text = '<p>Share</p>'}
-            $('#requests').after($("<div id='share_links'>"+share_text+"<div id='vk' class='link'>"+
-                    "</div><div id='google' class='link'></div>"+
-                    "<div id='facebook' class='link'><a href='https://www.facebook.com/sharer/sharer.php?u="+url_share+
-                        " target='_blank'><img src='static/css/icons/facebook.png'></a></div>"+
-                "</div>"))
-            $('#vk').html(VK.Share.button({url: url_share},
-                {type: 'custom', text: "<img src='static/css/icons/vk.png'>"}))//'<img src=\"https://vk.com/images/share_32.png\" width=\"32\" height=\"32\" />'
-            $('#google').html(google_share)
-            $('#share').css('justify-content: center');
-
-            $('#mapResultWrapper').css({display: 'flex'});
-            $("body").animate({scrollTop: $("#mapResultWrapper").offset().top + $('body').scrollTop()}, 1200);
-        }).fail(function() {
-            $.post('/error', {'descr': 'Невозможно выполнить запрос<br> Can\'t make request to server'})
-        });
+        //sheck lat lon end
     })
 }
 // form link for google
@@ -266,7 +337,7 @@ function insertInfo(result, area, lang){
                   ['Последние запросы', 'Last requests' ]];
     $('#info h4').remove();
     $('#info_list').remove();
-    $('#info').prepend($('<h4 style="-webkit-margin-after: 0em;">'+dictionary[0][lng]+'</h4>'))
+    $('#info').prepend($('<h4 style="margin: 3.5em 0.5em 0 0.5em; text-align: center;">'+dictionary[0][lng]+'</h4>'))
     $('#info h4').after($('<div id="info_list" ></div>'))
     path_img = 'static/css/icons/'
     if ( !$('#mapWrapper').length ){
@@ -289,29 +360,28 @@ function insertInfo(result, area, lang){
     $('#info_list').append($('<p><img src="'+path_img+'tree.png">'+dictionary[5][lng] +
         Math.round((result['objects']['tree']['count']*oneSegmentArea)/(10.7)) + '</p>'))
     $('#info_list').append($('<p><img src="'+path_img+'tree-silhouette.png">'+dictionary[6][lng]+'</p>'))
-    if ( !$('#newRequest').length && $('#mapWrapper').length ){
-        $('#info_list').after($("<div id='newRequest' class='btn' style='width: 100%; margin-top: 1%;'>"+dictionary[7][lng]+"</div>"))
-        $('#newRequest').click(function(){
-            $("html, body").animate({scrollTop: -1 * $("#mapContent").offset().top}, 1000);
-        })
-    }
-    $('#newRequest').text(dictionary[7][lng])
-    if (!window.location.href.includes('share')){
-        $('#newRequest').after($('<h4>'+(dictionary[8][lng])+'</h4>'));
-    }
+//    if ( !$('#newRequest').length && $('#mapWrapper').length ){
+//        $('#info_list').after($("<div id='newRequest' class='btn' style='width: 100%; margin-top: 1%;'>"+dictionary[7][lng]+"</div>"))
+//        $('#newRequest').click(function(){
+//            $("html, body").animate({scrollTop: -1 * $("#mapContent").offset().top}, 1000);
+//        })
+//    }
+//    $('#newRequest').text(dictionary[7][lng])
+//    if (!window.location.href.includes('share')){
+//        $('#newRequest').after($('<h4>'+(dictionary[8][lng])+'</h4>'));
+//    }
 }
 
 function insertRequesstList(list){
     // console.log(list)
     var text;
     if (window.lang == "RU"){text = 'Последние запросы'}
-    else{text = 'Last requests'}
-    if ( $('#map2').length != 0 ){
-        $('#info').append($("<div id='requests'></div>"));
+    else {text = 'Last requests'}
+//    if ( $('#map2').length != 0 ){
+//        $('#info').append($("<div id='requests'></div>"));
         for ( el in list ){
             $('#requests').append($('<div class="request_line"><div class="request">'+list[el][0]+'</div><div class="request">'+list[el][1]+'</div></div>'))
         }
-    }
 }
 
 
@@ -397,8 +467,8 @@ function initMap(longitude, latitude) {
 
 //Поле для ввода адреса, которое определяет координаты
 function setGeoCoder(map, id, main){
-var cityCircle, lat, lng;
-var input = document.getElementById(id);
+    var cityCircle, lat, lng;
+    var input = document.getElementById(id);
 
         var autocomplete = new google.maps.places.Autocomplete(
             input, {placeIdOnly: true});
@@ -466,9 +536,9 @@ var input = document.getElementById(id);
                 var path = [ new google.maps.LatLng(boundsOfArea.f.f,  boundsOfArea.b.f),
                     new google.maps.LatLng(boundsOfArea.f.f,  boundsOfArea.b.b),
                 ]
-
                 var dist = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
-                window.Area = dist * dist
+                window.Area = dist * dist;
+                console.log('area', window.Area)
                 // bounds: boundsOfArea,
                 var opts = {
                     bounds: boundsOfArea,

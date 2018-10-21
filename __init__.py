@@ -1,26 +1,53 @@
 from os import environ
-import keras.backend
-environ["KERAS_BACKEND"] = "theano"
-environ["MKL_THREADING_LAYER"] = "GNU"
-if keras.backend.backend() != 'theano':
-  raise BaseException("This script uses other backend")
-else:
-   keras.backend.set_image_dim_ordering('th')
+# import keras.backend
+# environ["KERAS_BACKEND"] = "theano"
+# environ["MKL_THREADING_LAYER"] = "GNU"
+# if keras.backend.backend() != 'theano':
+#   raise BaseException("This script uses other backend")
+# else:
+#    keras.backend.set_image_dim_ordering('th')
 
 from flask import Flask, render_template, request, jsonify, json, redirect, Blueprint
 from module import main
 from module.get_tile import get_map
-from keras.models import load_model
-import keras.backend as K
 import os.path
+from collections import deque
 from math import fabs
-#import theano
-import threading, time
-from multiprocessing.pool import ThreadPool
-app = Flask(__name__)
+from json import loads
+from celery import Celery
+import redis
+from requests import post
 
-model = load_model('module/new_model_25_bright.hdf5')
+r = redis.StrictRedis(host='127.0.0.1', port=6379)
+
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config['CELERY_RESULT_BACKEND'],
+        broker=app.config['CELERY_BROKER_URL']
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+
+app = Flask(__name__)
+app.config.update(CELERY_BROKER_URL='redis://127.0.0.1:6379',
+                  CELERY_RESULT_BACKEND='redis://127.0.0.1:6379')
+celery = make_celery(app)
+
 error = Blueprint('error', __name__)
+
+@celery.task()
+def get_detect_result(data_post):
+    res = post('http://127.0.0.1:5001/', data=data_post)
+    return res
 
 request_list = []
 # main page
@@ -41,15 +68,25 @@ def index():
             print('file  exist')
             with open('data/'+str(lat) + '_' + str(lon) + '.json') as f:
                 res = json.load(f)
-        else: # если данных нет, то сделать
+        else:
+            # если данных нет, то сделать
             print('file not exist')
-            img_map = get_map('newTest.png', float(lat), float(lon), 20, neighbourhood=7)
-            res = main.classify(img_map, tile_size=25, model=model, delta=0.97)
+            # ПОЛСЫЛАЕМ ЗАПРОС К ДРУГОМУ СЕРВЕРУ
+            # post to
+            data_post = {"lat": lat, "lon": lon}
+            # add to queue
+
+            resp = get_detect_result.delay(data_post)
+            # resp.wait()
+            res = loads(resp)
+            print(type(res))
+
             with open('data/'+str(lat)+'_'+str(lon)+'.json', 'w') as f:
                 json.dump(res, f, indent=4)
         # Добавить данные по координатам
         res.update({'lat': lat, 'lon': lon, 'requests': request_list})
         print(res, request_list)
+
         return jsonify(res)
     # Простой возврат начальной страницы
     if request.method == "GET" and len(request.form) == 0:
@@ -73,6 +110,8 @@ def share_view(lat, lon, language):
 def err():
     descr = str(request.form['descr'])
     return render_template('error.html', error=descr)
+
+
 
 if __name__ == "__main__":
     app.run()

@@ -22,7 +22,7 @@ def get_tile(input, output):
     server_id = randint(1, 3)
     while not input.empty():
         index, ((yp, xp), zp) = input.get_nowait()
-        url = f'https://khms{server_id}.googleapis.com/kh?v=803&x={xp}&y={yp}&z={zp}'
+        url = f'http://mt{server_id}.google.com/vt/lyrs=s&x={xp}&y={yp}&z={zp}'
         data = rq.get(url)
         if data.status_code == 200:
             img = Image.open(BytesIO(data.content))
@@ -32,7 +32,7 @@ def get_tile(input, output):
         input.task_done()
 
 
-def get_map(filename, lat, lon, zoom, neighbourhood=7, threads=8):
+def get_map(lat, lon, zoom, neighbourhood=7, threads=8):
     # получаем номер тайла по координатам
     x, y = tile_index(lat, lon, zoom)
     r_size = (neighbourhood * 2 + 1)

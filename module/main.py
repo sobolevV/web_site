@@ -42,18 +42,18 @@ def normalization_image(src):
     # img_np = cv2.imdecode(nparr, cv2.COLOR_RGB2BGR)
 
     kernel3 = np.array([[-0.1, -0.1, -0.1], [-0.1, 2, -0.1], [-0.1, -0.1, -0.1]])
-#kernel3_2 = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]]) # <-- Более резкий
-#kernel5 = np.array([[-0.1, 0, -0.1, 0, -0.1], [0, 0, 0, 0, 0], [-0.1, 0, 2, 0, -0.1], [0, 0, 0, 0, 0], [-0.1, 0, -0.1, 0, -0.1]])
-#kernel7 = np.array(
-#	[[0, 0, 0, -0.1, 0, 0, 0], [0, -0.1, 0, 0, 0, -0.1, 0], [0, 0, 0, 0, 0, 0, 0], [-0.1, 0, 0, 2, 0, 0, -0.1],
-#		 [0, 0, 0, 0, 0, 0, 0], [0, -0.1, 0, 0, 0, -0.1, 0], [0, 0, 0, -0.1, 0, 0, 0]])
-#nparr = np.fromstring(src, np.uint8)
+    #kernel3_2 = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]]) # <-- Более резкий
+    #kernel5 = np.array([[-0.1, 0, -0.1, 0, -0.1], [0, 0, 0, 0, 0], [-0.1, 0, 2, 0, -0.1], [0, 0, 0, 0, 0], [-0.1, 0, -0.1, 0, -0.1]])
+    #kernel7 = np.array(
+    #	[[0, 0, 0, -0.1, 0, 0, 0], [0, -0.1, 0, 0, 0, -0.1, 0], [0, 0, 0, 0, 0, 0, 0], [-0.1, 0, 0, 2, 0, 0, -0.1],
+    #		 [0, 0, 0, 0, 0, 0, 0], [0, -0.1, 0, 0, 0, -0.1, 0], [0, 0, 0, -0.1, 0, 0, 0]])
+    #nparr = np.fromstring(src, np.uint8)
 
     src = cv2.filter2D(img_np, -1, kernel=kernel3)
 
-    resR = src[:, :,2]
-    resG = src[:, :,1]
-    resB = src[:, :,0]
+    resR = src[:, :, 2]
+    resG = src[:, :, 1]
+    resB = src[:, :, 0]
 
     resR_dst = np.empty(shape=(len(src), len(src[0])), dtype='uint8')
     resG_dst = np.empty(shape=(len(src), len(src[0])), dtype='uint8')
@@ -79,7 +79,6 @@ def normalization_image(src):
 
 def classify(img_Src, tile_size, model, delta):
 
-    w, h = img_Src.size
     img_map = img_Src.resize((2500, 2500))
     # img_map = normalization_image(img_map)
     print(img_map.size)
