@@ -1,55 +1,21 @@
-from os import environ
-# import keras.backend
-# environ["KERAS_BACKEND"] = "theano"
-# environ["MKL_THREADING_LAYER"] = "GNU"
-# if keras.backend.backend() != 'theano':
-#   raise BaseException("This script uses other backend")
-# else:
-#    keras.backend.set_image_dim_ordering('th')
 
 from flask import Flask, render_template, request, jsonify, json, redirect, Blueprint
-from module import main
-from module.get_tile import get_map
+# from module import main
+# from module.get_tile import get_map
 import os.path
-from collections import deque
-from math import fabs
+# from math import fabs
 from json import loads
-from celery import Celery
-import redis
 from requests import post
-
-r = redis.StrictRedis(host='127.0.0.1', port=6379)
-
-def make_celery(app):
-    celery = Celery(
-        app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(app.config)
-
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
+from task import TaskSystem
 
 app = Flask(__name__)
-app.config.update(CELERY_BROKER_URL='redis://127.0.0.1:6379',
-                  CELERY_RESULT_BACKEND='redis://127.0.0.1:6379')
-celery = make_celery(app)
+app.config.update(DEBUG=True, SECRET_KEY='test-app-key')
+
+tasker = TaskSystem()
+request_list = []
 
 error = Blueprint('error', __name__)
 
-@celery.task()
-def get_detect_result(data_post):
-    res = post('http://127.0.0.1:5001/', data=data_post)
-    return res
-
-request_list = []
 # main page
 @app.route('/', methods = ['POST', 'GET'])
 def index():
@@ -76,7 +42,7 @@ def index():
             data_post = {"lat": lat, "lon": lon}
             # add to queue
 
-            resp = get_detect_result.delay(data_post)
+            resp = tasker.add_task(data_post)
             # resp.wait()
             res = loads(resp)
             print(type(res))
