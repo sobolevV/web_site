@@ -33,8 +33,13 @@ body, html{
     padding: 0;
 }
 header{
-    height: 4%;
     justify-content: space-between;
+}
+.menu_popup{
+    /*left: 8.6rem!important;
+    top: 2.5rem!important;
+    width: 29.5rem!important;*/
+    margin: 2px!important;
 }
 .opacity{
         background-color: rgba( 0, 0, 0, 0.8);
@@ -60,66 +65,17 @@ header{
     cursor: pointer;
 }
 
-#header{
-    font-family: Roboto Condensed;
-    background-image: url('test1-new.jpg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    /*box-shadow: -0.4em 1.3em 1.5em black;*/
-}
-footer{
-    height: 2%;
-    padding: 0.5% 5% 1% 5%;
-    display: flex;
-    background: black;
-    color: white;
-    justify-content: space-between;
-        border-top: 0.5px solid #292929;
-    font-size: 0.8em;
-}
 #logo{
-        width: 25%;
-         line-height: 1.7;
-        text-align: center;
-}
-#rights{
-
-}
-#headInstruction{
-
-}
-#head{
-    width: 100%;
-    justify-content: space-between;
-}
-.headBlock{
-    width: 100%;
-    align-content: center;
-    padding-top: 5%;
-}
-
-#steps{
-       width: 90%;
-    color: black;
+    width: 25%;
+    line-height: 1.7;
     text-align: center;
-    margin: 0 auto;
+}
 
-}
-.step{
-    width: 33%;
-    margin: 0 auto 0 auto;
-}
 
 .pac-container{
-    /*position: sticky!important;*/
-    left: 142px;
-        top: 3.5vh!important;
-    /* display: none; */
-    /*display: block!important;*/
+    left: 15px!important;
+    top: unset!important;
+    width: 100%;
 }
 .test-pac{
     width: 385px;
@@ -138,17 +94,7 @@ footer{
      height: 100%;
 }
 /*кнопка для выезда меню инструкций*/
-#info_slider{
-        width: 40px;
-    height: 40px;
-    background: white;
-    /* position: relative; */
-    /* left: 62%; */
-    top: 35px;
-    border-radius: 4px 0 0 4px;
-    text-align: center;
-    line-height: 3.5;
-}
+
 #menu{
      position: absolute;
     /* height: 80%; */
@@ -177,33 +123,7 @@ footer{
     background-color: white;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
-#slideBtn{
-border-bottom-color: rgb(71, 34, 131);
-    border: 1px solid;
-    border-radius: 4px;
-    border-left-color: rgb(71, 34, 131);
-    border-right-color: rgb(71, 34, 131);
-    border-top-color: rgb(71, 34, 131);
-    box-sizing: border-box;
-    color: rgb(71, 34, 131);
-    cursor: pointer;
-    font-family: "Roboto Condensed", sans-serif;
-    font-language-override: normal;
-    font-size: 12px;
-    font-size-adjust: none;
-    font-stretch: 100%;
-    font-variant-alternates: normal;
-    font-variant-position: normal;
-    line-height: 23.6px;
-    min-width: 86px;
-    outline-color: rgb(71, 34, 131);
-    padding: 8px 16px;
-    text-align: center;
-    text-transform: uppercase;
-}
-#slideBtn:hover{
-    cursor: pointer;
-}
+
 
 #panel{
     height: 100%;
@@ -212,26 +132,8 @@ border-bottom-color: rgb(71, 34, 131);
        margin: 0.9% 1% auto 1%;
        width: 10%!important ;
 }
-#topInput{
-    display: flex;
-    position: sticky;
-    justify-content: center;
-}
-#btn_container{
-    width: 30%;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    top: 75px;
-    left: 225px;
-    border-radius: 3px;
-}
-#toolsContainer{
-    width: 100%;
-    display: flex;
-    position: absolute;
-}
+
+
 .btn{
     border-radius: 3px;
     width: 33.3%;
@@ -276,82 +178,22 @@ border-bottom-color: rgb(71, 34, 131);
     background-color: light-gray;
     cursor: pointer;
 }
-#right_panel{
-    /*left: 65%;*/
-    right: 0px;
-    height: 100%;
-    width: 60px;
-    position: absolute;
-    display: flex;
-    top: 0%;
+#information{
+    height: 39rem;
 }
-.info_hide{
-    /*opacity: 0;
-    transition: 0.5s;*/
-}
-.info_show{
-    /*opacity: 1;
-    transition: 0.5s;*/
-}
-#info_container{
-    color: rgb(75, 16, 119);
-    background: white;
-    top: 0%;
-}
-
-#info{
+#information > .grid{
     /*border-color: rgb(71, 34, 131);
     border: 1px solid;*/
-    padding: 0 3%;
-    font-size: 1.1em;
-    height: 85%;
-    /* хром, сафари */
-    -webkit-scrollbar { width: 0; }
-    /* ie 10+ */
-    -ms-overflow-style: none;
-    /* фф (свойство больше не работает, других способов тоже нет)*/
-    overflow: -moz-scrollbars-none;
-}
-#info_list > p > img{
-    margin: 0 5px 0 5px;
-}
-#info_list{
-    height: 90%;
+    max-height: 35rem;
     overflow-y: scroll;
-}
-#submitBtn{
-   width: 100%!important;
-       box-sizing: border-box;
+    overflow-x: hidden;
 }
 
-/*h2{
-width: 100%;
-font-size: 1.5rem;
-text-align: center;
-}*/
 
 #requests{
     overflow-y: scroll;
-    /* height: 300px; */
-    max-height: 300px;
-    /* margin-bottom: 1%; */
-    /* text-align: center; */
-    /* border-bottom: 1px solid silver; */
-    border-top: 1px solid silver;
-}
-.request_line{
-     color: black;
-    display: flex;
-    border-bottom: 1px solid silver;
-    font-size: 0.9rem;
-    margin: 1%;
-}
-.request{
-    width: 50%;
-    /* height: 10%; */
-    text-align: center;
-    padding: 1% 0% 1% 0%;
-    /* font-size: 1.3rem; */
+    overflow-x: hidden;
+    max-height: 18rem!important;
 }
 
 a{
@@ -360,10 +202,8 @@ a{
 }
 
 
-#share_links{
-    display: flex;
-    line-height: 2.3;
-    justify-content: center;
+#links{
+    top: 10rem;
 }
 .link{
         margin: 1%;
@@ -380,24 +220,22 @@ a{
         font-size: 15px;
         font-weight: 300;
         height: 29px;
-        margin-left: 17px;
         margin-top: 10px;
         outline: none;
         padding: 0 11px 0 13px;
         text-overflow: ellipsis;
-        width: 400px;
+
       }
 
 .controls:focus {
     border-color: #4d90fe;
 }
 
-#map > div > div > div > .gm-style-mtc, #pac-input, #map > div > div > button{
+/*#map > div > div > div > .gm-style-mtc, #pac-input, #map > div > div > button{
     top: 65px!important;
     height: 40px;
-}
-#pac-input-bottom{
-    margin: 0;
+}*/
+#pac-input{
     width: 100%;
 }
 
@@ -405,10 +243,6 @@ a{
     top: 15px!important;
 }
 
-.error{
-    text-align: center;
-    color: white;
-}
 
 .item-1 {
   width: 20px;
@@ -614,16 +448,6 @@ $color: $color-1, $color-2, $color-3, $color-4, $color-5;
 }
 
 
-
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
-  overflow: hidden;
-  animation-delay: 1s;
-}
-
 @for $i from 1 through 5 {
   .item-#{$i} {
     width: 20px;
@@ -652,33 +476,11 @@ $color: $color-1, $color-2, $color-3, $color-4, $color-5;
   }
 }
 
-.indicator{
-    width: 25px;
-    height: 25px;
-    margin: auto 10px;
-    border-radius: 50%;
-    animation: indic 3s infinite linear;
-}
-
-@keyframes indic {
-   0% {
-        background: #eaffe9;
-        transform: scale(1);
-        opacity: 0.1;
-    }
-  65% {
-        background: #0cd603;
-        transform: scale(1.1);
-        opacity: 1;
-    }
-  100% {
-        background: #eaffe9;
-        transform: scale(1);
-        opacity: 0;
-  }
-}
 
 .heart{
+    padding-top: 0.8%;
+    font-size: 1.1em;
+    font-weight: bold;
      background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 30%, rgba(198,39,230,1) 50%, rgba(255,255,255,1) 70%, rgba(255,255,255,1) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -687,11 +489,11 @@ $color: $color-1, $color-2, $color-3, $color-4, $color-5;
 
 @keyframes heartAnim{
   35% {
-    background-position-x: 4rem;
+    background-position-x: 2rem;
   }
 
   75% {
-    background-position-x: -4rem;
+    background-position-x: -2rem;
   }
 
  }

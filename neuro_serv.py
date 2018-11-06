@@ -29,17 +29,21 @@ def main():
         lat = request.form['lat']
         print('post', lat, lon )
         # sent request to google to get img
-        img_map = get_map(float(lat), float(lon), 20, neighbourhood=7)
+        try:
+            img_map = get_map(float(lat), float(lon), 20, neighbourhood=7)
 
-        res = classify(img_map, tile_size=25, model=model, delta=0.85)
-        # analyse image with neuro
+            res = classify(img_map, tile_size=25, model=model, delta=0.85)
+            # analyse image with neuro
 
-        # get contours with cv2
+            # get contours with cv2
 
-        # in every contour convert pixels to lat-lon
+            # in every contour convert pixels to lat-lon
 
-        # format json and return
-        return json.dumps(res)
+            # format json and return
+            return json.dumps(res)
+        except Exception as e:
+            print("Error. Can't run image recognition ", e)
+            return 'fail'
     if request.method == "GET":
         print('get')
 

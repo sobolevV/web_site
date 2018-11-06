@@ -16,48 +16,71 @@ request_list = []
 
 error = Blueprint('error', __name__)
 
+def write_to_file(lat, lon, result):
+    with open('data/' + str(lat) + '_' + str(lon) + '.json', 'w') as f:
+        json.dump(result, f, indent=4)
+
 # main page
-@app.route('/', methods = ['POST', 'GET'])
+@app.route('/main', methods = ['POST', 'GET'])
 def index():
     global request_list
     if request.method == "POST" and len(request.form) != 0:
-        print('post')
-        lon = request.form['lon']
-        lat = request.form['lat']
-
+        lon, lat = request.form['lon'], request.form['lat']
         # Список 5 последних запросов
         request_list.insert(0, [request.form['address'], str(lat) + " " + str(lon)])
         if len(request_list) == 11:
             request_list.pop()
         # проверка на существование данных
+
+        # данные есть. возвращаем
         if (os.path.isfile('data/'+str(lat)+'_'+str(lon)+'.json')):
             print('file  exist')
             with open('data/'+str(lat) + '_' + str(lon) + '.json') as f:
                 res = json.load(f)
+            res.update({'lat': lat, 'lon': lon, 'requests': request_list})
+            return jsonify(res)
+        # данных нет, создаем задачу, говорим клиенту, чтобы ждал
         else:
-            # если данных нет, то сделать
             print('file not exist')
-            # ПОЛСЫЛАЕМ ЗАПРОС К ДРУГОМУ СЕРВЕРУ
-            # post to
             data_post = {"lat": lat, "lon": lon}
-            # add to queue
-
-            resp = tasker.add_task(data_post)
+            # добавляем задачу в список
+            tasker.add_task(data_post)
             # resp.wait()
-            res = loads(resp)
-            print(type(res))
+            # res = loads(resp)
+            # write_to_file(lat, lon, res)
 
-            with open('data/'+str(lat)+'_'+str(lon)+'.json', 'w') as f:
-                json.dump(res, f, indent=4)
-        # Добавить данные по координатам
-        res.update({'lat': lat, 'lon': lon, 'requests': request_list})
-        print(res, request_list)
+            # Добавить данные по координатам
+            # res.update({'lat': lat, 'lon': lon, 'requests': request_list})
+            # print(res, request_list)
 
-        return jsonify(res)
+            # сообщить о ожидании клиенту
+            return 'wait'
+
     # Простой возврат начальной страницы
     if request.method == "GET" and len(request.form) == 0:
         print('Get', request_list)
         return render_template('index.html', requests=request_list)
+
+# check results
+@app.route('/check/lat:<float:lat>_lon:<float:lon>', methods=["GET", "POST"])
+def check(lat, lon):
+    print('posted')
+    #lon, lat = request.form['lon'], request.form['lat']
+    res = tasker.check_status( lat,  lon)
+    # если рузальтат готов, то записываем в файл
+    if res != 'wait':
+        res = loads(res)
+        write_to_file(lat, lon, res)
+        res.update({'lat': lat, 'lon': lon, 'requests': request_list})
+        return jsonify(res)
+
+    return 'wait'
+
+# check requests
+@app.route('/request_list', methods=["GET", "POST"])
+def get_requests():
+
+    return jsonify(request_list)
 
 # share page
 @app.route('/share/lat:<float:lat>_lon:<float:lon>_lng:<string:language>', methods=['GET'])

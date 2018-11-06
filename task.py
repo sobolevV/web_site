@@ -1,7 +1,7 @@
 from threading import Thread, Lock
 from random import randrange
 from time import sleep
-
+from json import loads
 from requests import post
 
 class TaskSystem:
@@ -9,6 +9,7 @@ class TaskSystem:
         self.list = []
         self.id = 0
         self.mutex = Lock()
+        self.results = {}
         self.running = True
         self.thread = Thread(target=self.__thread)
         self.thread.start()
@@ -27,12 +28,15 @@ class TaskSystem:
                     continue
                 else:
                     # иначе переходим к след.
-                    self.list[self.id][1] -= 1
                     # если статус этого запроса ждет
                     if self.list[self.id][1] == 'wait':
                         # посылаем запрос
-                        post('http://127.0.0.1:5001/', data=self.list[self.id][0])
-                        self.list[self.id][2] = 'done'
+                        print(f'make request for {self.id}')
+                        res = post('http://127.0.0.1:5001/', data=self.list[self.id][0])
+                        print(res.text)
+                        # добавляем рузльтаты - долгота_широта : результат
+                        self.results.update({self.list[self.id][0]['lat']+'_'+self.list[self.id][0]['lon']: res.text})
+                        self.list[self.id][1] = 'done'
                         self.id += 1
                 if not self.running:
                     break
@@ -41,9 +45,14 @@ class TaskSystem:
         with self.mutex:
             self.list.append([LatLon, 'wait'])
 
-    def get_list(self):
-        result = []
+    def check_status(self, lat, lon):
         with self.mutex:
-            for name, cnt, status in self.list:
-                result.append({'name': name, 'status': status, 'counter': cnt})
-        return result
+            # если в списке результатов есть совпадение
+            for key in self.results.keys():
+                if str(lat)+'_'+str(lon) == key:
+                    return self.results[key]
+        # иначе дальше ожидаем
+        return 'wait'
+
+    def del_ready(self, key):
+        del self.results[key]

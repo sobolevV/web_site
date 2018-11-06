@@ -1,153 +1,189 @@
-<!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
+</head>
+
+<body style="background: #1B1C1D;">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename = 'icon.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename = 'css/icons/icon.png') }}">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.js"></script>-->
-
-    <style type="text/css">
-              @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
-    </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry"></script>
     <script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
+    </style>
+
     <title>LandProber</title>
-</head>
-<body>
 
-    <header>
-            <div id="logo">UCLAB</div>
-            <div class="row container">
-                <div class="ui simple dropdown item">
-                  More
-                  <i class="dropdown icon"></i>
-                  <div class="menu">
-                    <a class="item"><i class="edit icon"></i> Edit Profile</a>
-                    <a class="item"><i class="globe icon"></i> Choose Language</a>
-                    <a class="item"><i class="settings icon"></i> Account Settings</a>
-                  </div>
+
+
+    <header style="margin:0;" class="ui  inverted">
+
+        <div class="ui four column divided grid inverted menu middle aligned">
+            <div class="row" style="padding-top: 3px!important; padding-bottom: 3px!important;">
+                <!--                -->
+                <!--             <div class="divider vertical"></div>-->
+                <div class="column">
+                    <div class="ui header heart center aligned">UCLAB</div>
                 </div>
+
+                <div class="column center aligned">
+                    <div class="ui buttons purple ">
+                        <button id="ptr" class="ui button basic purple inverted">
+                            <i class="icon building outline"></i>
+                            Санкт-Петербург
+                        </button>
+                        <!--                    <button class="ui button basic inverted violet">Москва</button>-->
+                    </div>
+                </div>
+                <!--            <div class="divider vertical"></div>-->
+
+                <div class="column ">
+
+
+                    <div class="ui two buttons">
+                        <div id="request_menu" class="ui button">
+                            <i class=""></i>
+                            Новый запрос
+                        </div>
+
+
+
+
+                        <div id="request_list" class="ui button fluid">Архив запросов</div>
+
+
+                        <!--                            <div class="ui button">Классы</div>-->
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="column">
+                    <div class="ui right floated menu inverted column">
+                        <div class="ui buttons purple">
+                            <button id="RU" class="ui right floated inverted button basic purple lng active lang-text">Рус</button>
+                            <button id="EN" class="ui right floated inverted button basic purple lng">Eng</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row" style="padding: 0px!important">
+                <div class="column"></div>
+                <div class="column"></div>
+                <div class="column">
+
+                    <div id="search_container" class="ui fluid popup bottom left transition animating scale menu_popup" style="display: none;">
+                        <h3 class="ui header center aligned">Внимание</h3>
+                        <h3 class="ui header center aligned">Проверьте квадрат поиска</h3>
+                        <div style=" font-family: Comfortaa; white-space: unset;text-align: center;margin-top: 0.0em !important;" class="ui center aligned basic segment">
+                            <p>
+                                Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.
+                            </p>
+                        </div>
+                        <button id="submitBtn" class="ui center aligned purple button fluid">ПОЛУЧИТЬ</button>
+                        <input id="pac-input" class="controls" type="text" placeholder="Enter yout address" autocomplete="off">
+                    </div>
+
+                    <div id="requests" class="ui fluid popup bottom center transition animating scale menu_popup inverted" style="display: none;">
+                        <h4 class="ui header aligned center">Список запросов</h4>
+                        <div class="ui two columns grid middle aligned">
+                        
+                        </div>
+                    </div>
+
+                </div>
+                <div class="column"></div>
+
+            </div>
+
+
+            <!--            -->
+        </div>
+
+
+    </header>
+
+
+
+
+
+    <!--<div class="dimmed pusher">пушер</div>-->
+    <div id="right_sidebar" class="ui menu sidebar vertical right overlay huge">
+        <div id="right_loader" class="ui segment" style="height: 100%;">
+            <div class="ui active dimmer inverted">
+                <div class="ui loader large">
+                </div>
+            </div>
+            <!--                -->
+            <div id="information">
+                
+            </div>
+            <div id="links" class="item">
+                <h4 class="ui header item center aligned">Поделиться</h4>
+                <div id="links_container" class="ui three column grid container center aligned">
+                </div>
+                <div class="ui horizontal divider"></div>
                 <div class="item">
-                    Санкт-Петербург
+                    <div class="ui button fluid inverted">
+                        <a href="http://urbanbasis.com/feedback">
+                            <i class="icon comment"></i>
+                            Оставить отзыв о сайте
+                        </a>
+                    </div>
+
                 </div>
             </div>
-            <div id="language" style="font-family: 'Roboto';">
-                <div id="RU" class="lng">Рус</div>
-                <div id="EN" class="lng">Eng</div>
-            </div>
-        </header>
-
-    <!--<div id="header">-->
-        <!--<h1 style="padding-top: 12%;font-size: 2.7rem;margin: 0;font-family: 'Ubuntu', sans-serif;">LandProber</h1>-->
-        <!--<h2 style="font-size: 1.1em;font-family: &quot;Open SANS&quot;, SANS-SERIF;">-->
-            <!--Зонд космической оценки землепользования<br>(озелененность территории)-->
-        <!--</h2>-->
-
-        <!--<div id="headInstruction">-->
-            <!--<div id="topInstruction" style="font-size: 1em;/* text-shadow: 2px 2px 1px black; */padding-top: 7%;">-->
-                <!--<div style="display: flex;justify-content: center;-webkit-margin-before: 3em;">-->
-                    <!--<h3 style="FONT-FAMILY: &quot;Play&quot;;font-size: 1em;">-->
-                        <!--Космический аппарат готов к работе-->
-                    <!--</h3>-->
-                    <!--<div class="indicator">-->
-
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<p style="FONT-FAMILY:  &quot;Comfortaa&quot;">-->
-                    <!--Для начала работы со спутником, укажите квадрат поиска - введите адрес-->
-                <!--</p>-->
-            <!--</div>-->
-            <!--<div id="topInput">-->
-                    <!--<input id="pac-input-top" class="controls" type="text" placeholder="Enter a location" autocomplete="off">-->
-                    <!--<div id="checkBtn" class="btn color_btn">ПОКАЗАТЬ</div>-->
-            <!--<div class="pac-container pac-logo" style="display: none; width: 398px; position: absolute; left: 142px; top: 797px;"></div><div class="pac-container pac-logo" style="width: 398px; position: absolute; left: 304px; top: 557px; display: none;"></div></div>-->
-        <!--</div>-->
-    <!--</div>-->
-
-    <div id="mapWrapper" class="mapContainer">
-        <input id="pac-input" class="controls" type="text" placeholder="Enter a location">
-        <div id='map' ></div>
-        <div id="btn_container">
-            <div id="newRequest" class="btn">Новый запрос</div>
-
-            <div id="archive" class="btn">Архив запросов</div>
-            <div id="layers" class="btn">Слои</div>
-        </div>
-        <!--menu for button-->
-        <div id="toolsContainer">
-             <div id="menu" class="hide" style="display: none;">
-                     <!--new request-->
-                 <div id="panel">
-                            <div id="steps">
-                                <h4 style="font-family: 'Play'; font-size: 1.2em;">
-                                    Внимание! <br>
-                                    Проверьте квадрат поиска
-                                </h4>
-                                <p style=" font-family: Comfortaa; font-size: 0.95em; -webkit-margin-after: 1.8em; color: black;">
-                                    Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.
-                                </p>
-                                <!--<p>Кнопка "Получить" находится над картой.</p>-->
-                            </div>
-                        <p style="font-family: 'open sans'"></p>
-                        <div id="submitBtn" class="btn color_btn">Получить</div>
-                        <input id="pac-input-bottom" class="controls" type="text" placeholder="Enter a location" autocomplete="off">
-                 </div>
-                 <!--archive of requests-->
-                    <div id='requests' style="height: 200px">
-
-                    </div>
-                 <!--choose classes-->
-                 <div id='classes' style="height: 200px">
-
-                    </div>
-             </div>
-            <!--button for info slider-->
-
-        </div>
-        <div id="right_panel"  >
-            <!--arrow btn-->
-            <div style="margin: 75px 10px;">
-                <div id="info_slider" >
-                    <img src='static/css/icons/arrow.png'>
-                </div>
-            </div>
-
-            <!--info slider block-->
-            <div id="info_container" class="info_hide">
-                <div id="info"></div>
-            </div>
+            <!--                -->
 
         </div>
 
-        <!--<div id="mapContent">-->
-            <!--<div id="slideBtn" class="show">Скрыть</div>-->
-            <!--<div id="panel">-->
-                    <!--<div id="steps">-->
-                        <!--<h4 style="font-family: 'Play'; font-size: 1.2em;">-->
-                            <!--Внимание! <br>-->
-                            <!--Проверьте квадрат поиска-->
-                        <!--</h4>-->
-                        <!--<p style=" font-family: Comfortaa; font-size: 0.95em; -webkit-margin-after: 1.8em; color: black;">-->
-                        <!--Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.-->
-                        <!--</p>-->
-                        <!--&lt;!&ndash;<p>Кнопка "Получить" находится над картой.</p>&ndash;&gt;-->
-                    <!--</div>-->
-                <!--<p style="font-family: 'open sans'"></p>-->
-                    <!--<div id="submitBtn" class="btn">Получить</div>-->
-            <!--</div>-->
-        <!--</div>-->
+
+
+
+
+
+
+        <!--
+            <div class="item">xjcnksdn</div>
+            <div class="item">sdfgsdfg</div>
+-->
+    </div>
+    <div class="pusher">
+        <!-- pusher -> cointainer for map and other under slidebar -->
+        <div id="map" style="height: 95%; background: gray;">
+
+        </div>
     </div>
 
-    <footer>
-        <div id="rights"></div>
-        <div id="comment" style="display: flex;">
-            <a href="http://urbanbasis.com/feedback">Оставить отзыв о сайте </a>
-            <img src="static/css/icons/comments.png" style="margin-left: 5px;">
+
+
+    <!--
+   <footer class="ui small segment grid">
+        <div class="six wide column">
+            <i class="icon copyright"></i>
         </div>
-    </footer>
+        <div class="ui right floated five wide column">
+            коммент
+            <a class="ui link">link</a></div>
+   </footer>
+-->
+
+    <script src="https://apis.google.com/js/platform.js" async="" defer="" gapi_processed="true"></script>
+    <script>
+        //$('.ui.sidebar.bottom').sidebar({context: '#'})menuContainer
+    </script>
+
 </body>
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 <script async src="{{ url_for('static', filename = 'js/script.js') }}"></script>
+
 </html>
