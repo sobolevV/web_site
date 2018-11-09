@@ -179,7 +179,7 @@ header{
     cursor: pointer;
 }
 #information{
-    height: 39rem;
+/*    max-height: 38rem;*/
 }
 #information > .grid{
     /*border-color: rgb(71, 34, 131);

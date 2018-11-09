@@ -21,7 +21,7 @@ def write_to_file(lat, lon, result):
         json.dump(result, f, indent=4)
 
 # main page
-@app.route('/main', methods = ['POST', 'GET'])
+@app.route('/home', methods = ['POST', 'GET'])
 def index():
     global request_list
     if request.method == "POST" and len(request.form) != 0:

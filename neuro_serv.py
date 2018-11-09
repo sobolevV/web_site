@@ -7,7 +7,7 @@ if keras.backend.backend() != 'theano':
 else:
    keras.backend.set_image_dim_ordering('th')
 
-from flask import Flask, request, jsonify, json, redirect, Blueprint
+from flask import Flask, request, jsonify, json
 from module.neuro_processing import classify
 from module.get_tile import get_map
 from keras.models import load_model

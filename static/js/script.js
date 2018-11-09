@@ -6,7 +6,7 @@ lang = 'RU'
 resultGlobal = ''
 cropSize = 25
 
-$('document').ready(function () {
+$('document').ready(function (result) {
     var lng, lat;
     lng = 48.707067;
     lat = 44.5169033;
@@ -40,9 +40,12 @@ $('document').ready(function () {
     //slideBtn();
     //slideInfo();
     //initButtons();
-    $(".ui.sidebar.right").sidebar({
+    if ( !window.location.href.includes('share') ){
+        $(".ui.sidebar.right").sidebar({
         'context': '#map'
-    });
+        });    
+    }
+    
     $('#requests').css({
         display: 'none'
     });
@@ -66,6 +69,8 @@ $('document').ready(function () {
 
     get_requests();
     setInterval(get_requests(), 20000);
+    
+    
 
 });
 
@@ -91,8 +96,10 @@ function sentRequest(buttonId) {
             var destination = $(window).height()
 
             // if it first request by user
-
-            $('#right_sidebar').addClass('visible');
+            if( !$('#right_sidebar').hasClass('visible') ){
+                $('#right_sidebar').toggle('visible');
+            } 
+            
             //$('#right_sidebar').toggle('visible');
             $('#right_loader').dimmer('show');
 
@@ -115,10 +122,7 @@ function sentRequest(buttonId) {
                     //write results from RESULT
                     show_results(result)
                     $('#right_loader').dimmer('hide');
-                    //console.log('checker ready')
                 }
-                //console.log('posted')
-                //$("body").animate({scrollTop: $("#mapResultWrapper").offset().top + $('body').scrollTop()}, 1200);
             }).fail(function () {
                 $.post('/error', {
                     'descr': 'Невозможно выполнить запрос<br> Can\'t make request to server'
@@ -126,7 +130,6 @@ function sentRequest(buttonId) {
             });
         } else {
             alert('Вы не выбрали место');
-            //console.log(window.globalLat, window.globalLon);
         }
         //sheck lat lon end
     })
@@ -141,7 +144,6 @@ function get_requests() {
 function check_results(lat, lon) {
     $.post('/check/lat:' + lat + '_lon:' + lon, function (result) {
         if (result != 'wait') {
-            console.log('ready result', result);
             window.resultGlobal = result;
             clearTimeout(window.checker);
             show_results(result);
@@ -196,7 +198,6 @@ function shareGoogle() {
 function drawResult(map, json) {
     var lat = Number(json['lat'])
     var lng = Number(json['lon'])
-    // console.log('drawRes', lat, lng)
     // var area;
     var latLng = new google.maps.LatLng(lat, lng)
     // get coords for big rectangle - area
@@ -207,8 +208,6 @@ function drawResult(map, json) {
     ///////////////////////////////
     var pixRecX = Math.abs((boundsOfRect['l']['j'] - boundsOfRect['l']['l'])) / (100)
     var pixRecY = Math.abs((boundsOfRect['j']['j'] - boundsOfRect['j']['l'])) / (100)
-    console.log(pixRecX, pixRecY)
-    // console.log('pixX', pixRecX, 'pixY', pixRecY)
 
     var areaPoints = [
             new google.maps.LatLng(lat, lng),
@@ -236,7 +235,6 @@ function drawResult(map, json) {
             if (json[+(i) + ':' + (j)]['delta']) {
                 color = json[+(i) + ':' + (j)]['color']
                 addRectangle(map, bounds, color)
-                //console.log('bounds', bounds, 'res',result[+(99-i)+':'+(99-j)])
             }
             leftTopX += pixRecX;
         }
@@ -253,11 +251,9 @@ function drawResult(map, json) {
 
 // insert info to result block
 function insertInfo(result, area, lang) {
-    // console.log('area = ', area)
     $('#information').empty();
     var commonObjCount = Math.pow(2500 / window.cropSize, 2) //сетка
     var oneSegmentArea = area / commonObjCount
-    // console.log(commonObjCount)
     var enToRu = {
         'tree': 'Деревья'
     };
@@ -282,10 +278,9 @@ function insertInfo(result, area, lang) {
     $('#information').append($('<h4 class="ui header center aligned item">' + dictionary[0][lng] + '</h4>'))
     //$('#info h4').after($('<div id="info_list" ></div>'))
     path_img = 'static/css/icons/'
-    //    if ( !$('#mapWrapper').length ){
-    //        path_img = '../' + path_img;
-    //    }
-    // console.log(path_img)
+        if ( window.location.href.includes('share') ){
+            path_img = '../' + path_img;
+        }
     //
     $('#information').append($('<div class="ui grid middle aligned"></div>'))
     
@@ -336,7 +331,6 @@ function insertInfo(result, area, lang) {
 }
 
 function insertRequesstList(list) {
-    // console.log(list)
     $('#requests row').remove();
     var text;
     if (window.lang == "RU") {
@@ -356,7 +350,6 @@ function insertRequesstList(list) {
 
 //изобразить квадрат на карте
 function addRectangle(map, bounds, color) {
-    // console.log('rectangle added')
     var rectangle = new google.maps.Rectangle({
         strokeColor: color,
         strokeOpacity: 0.0,
@@ -382,7 +375,6 @@ function getPixelCoordinates(latLng, zoom) {
     var pixelCoordinate = new google.maps.Point(
         Math.floor(worldCoordinate.x * scale),
         Math.floor(worldCoordinate.y * scale));
-    //console.log('pixels coords', pixelCoordinate)
 }
 
 function project(latLng) {
@@ -404,7 +396,6 @@ function getBoundsOfArea(center, map) {
     var scale = Math.pow(2, zoom);
 
     var proj = map.getProjection();
-    // console.log('map in bounds', map, 'center', center, 'proj', proj);
     var wc = proj.fromLatLngToPoint(center);
     var bounds = new google.maps.LatLngBounds();
     var sw = new google.maps.Point(((wc.x * scale) - imgSize) / scale, ((wc.y * scale) - imgSize) / scale);
@@ -414,8 +405,6 @@ function getBoundsOfArea(center, map) {
     var point2 = new google.maps.Point(ne);
     bounds.extend(proj.fromPointToLatLng(ne));
 
-    // console.log('bound of Big rectangle', bounds)
-    //var rect = new google.maps.Rectangle(opts);
     return bounds
 }
 
@@ -437,7 +426,6 @@ function initMap(longitude, latitude) {
             zoom: 17,
             center: location
         });
-    console.log("map init")
     return map
 }
 
@@ -462,7 +450,6 @@ function setGeoCoder(map, id, main) {
     var geocoder = new google.maps.Geocoder;
 
     autocomplete.addListener('place_changed', function () {
-        console.log('listener ready')
         var place = autocomplete.getPlace();
         if (!place.place_id) {
             return;
@@ -500,17 +487,15 @@ function setGeoCoder(map, id, main) {
             var testCoord = new google.maps.Point(pixels_x, pixels_y)
             lat = window.map.getProjection().fromPointToLatLng(testCoord).lat()
             lng = window.map.getProjection().fromPointToLatLng(testCoord).lng()
-            console.log('changed coords', lat, lng)
             // Set the position of the marker using the place ID and location.
 
             var boundsOfArea = getBoundsOfArea(new google.maps.LatLng(Number(lat), Number(lng)), window.map)
-            console.log('vounds = ', boundsOfArea)
+            //console.log('bounds = ', boundsOfArea)
             var path = [new google.maps.LatLng(boundsOfArea.j.j, boundsOfArea.l.j),
                           new google.maps.LatLng(boundsOfArea.j.l, boundsOfArea.l.l),
                 ]
             var dist = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
             window.Area = dist * dist;
-            console.log('area', window.Area)
             // bounds: boundsOfArea,
             var opts = {
                 bounds: boundsOfArea,
@@ -529,7 +514,6 @@ function setGeoCoder(map, id, main) {
             window.globalLat = lat
             window.globalLon = lng
 
-            // console.log('coords latLng changed', window.globalLat, window.globalLon)
         });
     });
 }
