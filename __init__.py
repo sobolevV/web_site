@@ -1,105 +1,118 @@
-
-from flask import Flask, render_template, request, jsonify, json, redirect, Blueprint
-# from module import main
-# from module.get_tile import get_map
 import os.path
-# from math import fabs
+from flask import Flask, render_template, request, jsonify, json, redirect, Blueprint, send_from_directory
 from json import loads
-from requests import post
 from task import TaskSystem
 
 app = Flask(__name__)
+
 app.config.update(DEBUG=True, SECRET_KEY='test-app-key')
 
 tasker = TaskSystem()
-request_list = []
+archive = []
 
 error = Blueprint('error', __name__)
 
-def write_to_file(lat, lon, result):
-    with open('data/' + str(lat) + '_' + str(lon) + '.json', 'w') as f:
-        json.dump(result, f, indent=4)
+
+def write_to_file(location_name, result):
+    with open('data/' + str(location_name) + '.json', 'w') as f:
+        json.dump(result, f)
+
 
 # main page
-@app.route('/home', methods = ['POST', 'GET'])
+@app.route('/', methods = ['POST', 'GET'])
 def index():
-    global request_list
-    if request.method == "POST" and len(request.form) != 0:
-        lon, lat = request.form['lon'], request.form['lat']
-        # Список 5 последних запросов
-        request_list.insert(0, [request.form['address'], str(lat) + " " + str(lon)])
-        if len(request_list) == 11:
-            request_list.pop()
-        # проверка на существование данных
-
-        # данные есть. возвращаем
-        if (os.path.isfile('data/'+str(lat)+'_'+str(lon)+'.json')):
-            print('file  exist')
-            with open('data/'+str(lat) + '_' + str(lon) + '.json') as f:
-                res = json.load(f)
-            res.update({'lat': lat, 'lon': lon, 'requests': request_list})
-            return jsonify(res)
-        # данных нет, создаем задачу, говорим клиенту, чтобы ждал
-        else:
-            print('file not exist')
-            data_post = {"lat": lat, "lon": lon}
-            # добавляем задачу в список
-            tasker.add_task(data_post)
-            # resp.wait()
-            # res = loads(resp)
-            # write_to_file(lat, lon, res)
-
-            # Добавить данные по координатам
-            # res.update({'lat': lat, 'lon': lon, 'requests': request_list})
-            # print(res, request_list)
-
-            # сообщить о ожидании клиенту
-            return 'wait'
-
+    global archive
     # Простой возврат начальной страницы
     if request.method == "GET" and len(request.form) == 0:
-        print('Get', request_list)
-        return render_template('index.html', requests=request_list)
+        return render_template('index.html', requests=archive)
 
-# check results
-@app.route('/check/lat:<float:lat>_lon:<float:lon>', methods=["GET", "POST"])
-def check(lat, lon):
-    print('posted')
-    #lon, lat = request.form['lon'], request.form['lat']
-    res = tasker.check_status( lat,  lon)
-    # если рузальтат готов, то записываем в файл
-    if res != 'wait':
-        res = loads(res)
-        write_to_file(lat, lon, res)
-        res.update({'lat': lat, 'lon': lon, 'requests': request_list})
+
+@app.route('/analyze', methods=["GET", "POST"])
+def analyze_area():
+    global archive
+    data = dict(request.form)
+    data = json.loads(data['values'])
+    path = data['arrayOfCoords']
+    place_name = data['location']
+    classes = data['classes']
+
+    # данные есть. возвращаем
+    if os.path.isfile(f'data/{place_name}.json'):
+        print('file  exist')
+        with open(f'data/{place_name}.json') as f:
+            data = json.load(f)
+        res = {'address': place_name, 'requests': archive, 'paths': data}
         return jsonify(res)
 
+    # добавляем задачу в список
+    data_post = {"path": str(path), "place_name": place_name, 'classes': str(classes)}
+    tasker.add_task(data_post)
     return 'wait'
 
-# check requests
-@app.route('/request_list', methods=["GET", "POST"])
-def get_requests():
 
-    return jsonify(request_list)
-
-# share page
-@app.route('/share/lat:<float:lat>_lon:<float:lon>_lng:<string:language>', methods=['GET'])
-def share_view(lat, lon, language):
-    print(language)
-    if (os.path.isfile('data/'+str(lat)+'_'+str(lon)+'.json')):
-        with open('data/'+str(lat) + '_' + str(lon) + '.json') as f:
-            res = json.load(f)
-        res.update({'lat': lat, 'lon': lon})
-        return render_template('share.html', res=json.dumps(res), lng=language)
+# check results
+@app.route('/check', methods=["GET", "POST"])
+def check():
+    print(request.form)
+    location_name = request.form['location']
+    # location_name = location_name.decode('utf-8', 'ignore')
+    print(location_name)
+    res = tasker.check_status(location_name)
+    # если рузальтат готов, то записываем в файл
+    # if res == 'wait':
+    #     return "wait"
+    if res == "fail":
+        return render_template('500.html'), 500
+    elif res == "wait":
+        return "wait"
     else:
-        return render_template('index.html')
+        return_data = {'paths': res}
+        write_to_file(location_name, res)
 
-# error
-@app.route('/error', methods=['GET', 'POST'])
-def err():
-    descr = str(request.form['descr'])
-    return render_template('error.html', error=descr)
+        archive.insert(0, [location_name])
+        if len(archive) == 11:
+            archive.pop()
 
+        return_data.update({'location': location_name, 'requests': archive})
+        return jsonify(return_data)
+
+
+@app.route('/ready', methods=["GET", "POST"])
+def get_ready():
+    location_name = request.form['location']
+    print(location_name)
+    with open(f'data/{location_name}.json') as f:
+        data = json.load(f)
+    return jsonify({"paths": data})
+
+
+# get form
+@app.route('/results', methods=["GET", "POST"])
+def get_results():
+    return render_template('result.html')
+
+
+# check requests
+@app.route('/archive', methods=["GET", "POST"])
+def get_requests():
+    return jsonify(archive)
+
+
+# Errors and other
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'logo.ico')
 
 
 if __name__ == "__main__":

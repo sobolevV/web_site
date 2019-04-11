@@ -6,12 +6,13 @@
 
 <body style="background: #1B1C1D;">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename = 'css/logo.png') }}" type="image/png" sizes="any">
+    <link rel="icon" href="{{ url_for('static', filename = 'css/icons/logo.png') }}" type="image/png" sizes="any">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/2.0.3/jsts.min.js"></script>
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.js"></script>-->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry,drawing"></script>
     <script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
@@ -21,26 +22,23 @@
 
 
 
+<!--
     <header style="margin:0;" class="ui  inverted">
 
-        <div class="ui four column divided grid inverted menu middle aligned">
+        <div class="ui three column divided grid inverted menu middle aligned">
             <div class="row" style="padding-top: 3px!important; padding-bottom: 3px!important;">
-                <!--                -->
-                <!--             <div class="divider vertical"></div>-->
                 <div class="column">
                     <div class="ui header heart center aligned">UCLAB</div>
                 </div>
 
-                <div class="column center aligned">
+                <div class="column center aligned" style="display: none;">
                     <div class="ui buttons purple ">
-                        <button id="ptr" class="ui button basic purple inverted">
+                        <button id="ptr" class="ui button basic grey inverted">
                             <i class="icon building outline"></i>
                             Санкт-Петербург
                         </button>
-                        <!--                    <button class="ui button basic inverted violet">Москва</button>-->
                     </div>
                 </div>
-                <!--            <div class="divider vertical"></div>-->
 
                 <div class="column ">
 
@@ -57,8 +55,6 @@
                         <div id="request_list" class="ui button fluid">Архив запросов</div>
 
 
-                        <!--                            <div class="ui button">Классы</div>-->
-
                     </div>
 
                 </div>
@@ -66,7 +62,8 @@
 
 
                 <div class="column">
-                    <div class="ui right floated menu inverted column">
+
+                   <div class="ui right floated menu inverted column">
                         <div class="ui buttons purple">
                             <button id="RU" class="ui right floated inverted button basic purple lng active lang-text">Рус</button>
                             <button id="EN" class="ui right floated inverted button basic purple lng">Eng</button>
@@ -78,7 +75,7 @@
 
             <div class="row" style="padding: 0px!important">
                 <div class="column"></div>
-                <div class="column"></div>
+                <div class="column" style="display: none;"></div>
                 <div class="column">
 
                     <div id="search_container" class="ui fluid popup bottom left transition animating scale menu_popup" style="display: none;">
@@ -106,24 +103,26 @@
             </div>
 
 
-            <!--            -->
+                        
         </div>
 
 
-    </header>
+    </header>-->
 
 
 
 
 
     <!--<div class="dimmed pusher">пушер</div>-->
+<!--  МЕНЮ С ЗАПРОСАМИ И АРХИВОМ  -->
+<!--
     <div id="right_sidebar" class="ui menu sidebar vertical right overlay huge">
         <div id="right_loader" class="ui segment" style="height: 100%;">
             <div class="ui active dimmer inverted">
                 <div class="ui loader large">
                 </div>
             </div>
-            <!--                -->
+            
             <div id="information">
                 
             </div>
@@ -142,40 +141,227 @@
 
                 </div>
             </div>
-            <!--                -->
 
         </div>
 
-
-
-
-
-
-
-        <!--
-            <div class="item">xjcnksdn</div>
-            <div class="item">sdfgsdfg</div>
+    </div>
 -->
+<!--  МЕНЮ С ЗАПРОСАМИ И АРХИВОМ  -->
+   <div id="logo" class="">UrbanBasis</div>
+    
+    
+    <div id="map" style="height: 100%;">
+    
     </div>
-    <div class="pusher">
-        <!-- pusher -> cointainer for map and other under slidebar -->
-        <div id="map" style="height: 95%; background: gray;">
-
-        </div>
+    
+    
+<!--
+<div id="preloader" class="hidden">
+  <div id="loader"></div>
+</div>    
+-->
+    
+    
+<div class="ui centered grid" style="
+    /* position: absolute; */
+    margin-top: 10px;
+    /* left: 20rem; */
+">
+<div class="ui purple hidden message" style="
+    z-index: 3;
+">
+    <i class="large close icon"></i>
+    <div class="header">
+        There were some errors with your submission
     </div>
-
-
+    <ul class="list">
+        <li>You must include both a upper and lower case letters in your password.</li>
+        <li>You need to select your home country.</li>
+    </ul>
+</div>
+</div>
+    
+<div class="ui icon negative message hidden" style="
+    width: 30%;
+    /* left: 27rem; */
+    margin: 10 auto;
+    z-index: 2;
+">
+  <i class="icon info"></i>
+  <div class="content">
+    <div class="header">
+      Просим прощения! Возникли неполадки на сервере.
+    </div>
+    <p>Попробуйте заново или вернитесь позже.</p>
+      <div class="ui button red fluid">Вернуться</div>
+  </div>
+</div>
+    
+<div id="map_overlay" class="ui centered grid menu" style="
+        position: absolute;
+        max-width: 27rem;
+        max-height: 65rem;
+        /* left: 66px; */
+        margin: auto;
+        margin-left: 69%;
+        top: 10px;
+        right: 10px;
+        /* font-size: 2rem; */
+        /* bottom: 0; */
+        /* color: red; */
+        font-weight: bold;
+        /* overflow-y: scroll; */
+        ">
 
     <!--
-   <footer class="ui small segment grid">
-        <div class="six wide column">
-            <i class="icon copyright"></i>
+        <div class="ui right menu vertical sidebar visible overlay blue" >
+            asdf
         </div>
-        <div class="ui right floated five wide column">
-            коммент
-            <a class="ui link">link</a></div>
-   </footer>
 -->
+    <div class="row" style="">
+        <div class="center aligned column">
+
+            <div class="row">
+                <div id="search_container" class="column">
+                    <input id="pac-input" class="controls" type="text" placeholder="Введите адрес" autocomplete="off" style="
+    border-radius: 4px;
+">
+
+                    
+                    
+                <div class="pac-container pac-logo" style="width: 336px; position: absolute; left: 861px; top: 109px; display: none;"></div><div class="pac-container pac-logo" style="display: none; width: 275px; position: absolute; left: 925px; top: 109px;"></div><div class="pac-container pac-logo" style="display: none; width: 346px; position: absolute; left: 893px; top: 64px;"></div></div>
+            </div>
+
+            <div class="ui horizontal divider"></div>
+            <div class="row">
+                <div class="column">
+
+
+                    <div id="list_of_classes" class="ui vertical labeled icon fluid basic buttons" style="
+    overflow-y: scroll;
+    max-height: 10rem;
+">
+                        <button class="ui button" value="trees">
+                            <i class="tree icon"></i>
+                            Деревья
+                        </button>
+
+                        <button class="ui button" value="cars">
+                            <i class="car icon"></i>
+                            Автомобили
+                        </button>
+
+                        <button class="ui button" value="garage">
+                            <i class="cube icon"></i>
+                            Гаражи
+                        </button>
+
+                        <button class="ui button" value="water">
+                            <i class="tint icon"></i>
+                            Вода
+                        </button>
+<!--
+                        <button class="ui    button" value="trees">
+                            <i class="building icon"></i>
+                            Здания
+                        </button>
+-->
+                    </div>
+                </div>
+            </div>
+
+            <button id="submitBtn" class="ui button purple fluid">Получить данные с зонда</button>
+
+        </div>
+
+
+    </div>
+
+    <!--  Резульатты анализа территории  -->
+    <div class="row " style="
+">
+
+        <div class="center aligned column">
+
+            <div class="row">
+
+                <div class="">Архив запросов</div>
+                <div class="ui column segment" style="
+    overflow-y: scroll;
+    max-height: 130px;
+">
+
+                    <div id="archive" class="ui grid middle aligned" style="
+    /* overflow-y: -webkit-paged-x; */
+">
+                        <div class="ui basic item button row" value="   Kazan, Tatarstan, Russia_55.8304307 49.06608060000008 ">
+                            <div class="column"> Kazan, Tatarstan, Russia</div>
+
+                        </div>
+
+                        <div class="ui basic item button row" value=" набережная реки Фонтанки, Санкт-Петербург, Россия_59.92290209999999 30.319888399999968 ">
+                            <div class="column">набережная реки Фонтанки, Санкт-Петербург, Россия</div>
+
+                        </div>
+                        <div class="ui inverted horizontal divider"></div>
+
+                        <div class="ui inverted horizontal divider"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui hidden horizontal divider"></div>
+            <div class="row">
+
+                <div class="ui basic vertical fluid buttons">
+                    <button class="ui button disabled">Спецпроект: «Деревья Санкт-Петербурга»
+                    </button><button class="ui button">Заказать мониторинг для своей местности
+                    </button>
+ <a class="ui button" target="_blank" rel="noopener noreferrer" href="http://urbanbasis.com/feedback" style="
+    color: gray;
+">   Оставить отзыв о сервисе </a>
+
+                </div>
+            </div>
+            <!-- Блок с результатами  -->
+
+
+
+            <div class="ui row grid">
+
+            </div>
+
+        </div>
+    </div>
+    <div class="ui hidden divider"> </div>
+    <div id="preloader" class=" row">
+            <div class="row">
+                <div class="center aligned column">
+                    <div id="loader"></div>
+                </div>
+            </div>
+        
+            <div id="welcome" class="center aligned column" style="width: unset!important;">
+                <!--      убираем после 1 запроса      -->
+                <h5>Космический аппарат готов к работе</h5>
+                <img class="ui centered small image" src="/static/css/icons/sat.png">
+                <h4>Для начала работы с аппаратом укажите новый квадрат поиска или выберите из архива</h4>
+            </div>  
+        
+<!--     Добавляем после 1 запроса   -->
+        
+        
+    </div>
+    {% block results %}
+    {% endblock %}
+</div>
+
+    
+<!--  Кнопки выделения территории  -->
+    <div class="ui centered grid" style="bottom: 2rem;position: absolute;width: 100%;">
+    <div id="select_tool" class="ui circular icon green button">Выделить область</div>
+    <div id="rm_select" class="ui circular icon yellow button" style="display: none;">Удалить область</div>
+
+</div>
 
     <script src="https://apis.google.com/js/platform.js" async="" defer="" gapi_processed="true"></script>
     <script>
@@ -185,5 +371,7 @@
 </body>
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 <script async src="{{ url_for('static', filename = 'js/script.js') }}"></script>
-
+<script async src="{{ url_for('static', filename = 'js/UI_events.js') }}"></script>
+    <script async src="{{ url_for('static', filename = 'js/select_tool.js') }}"></script>
+    
 </html>

@@ -1,29 +1,34 @@
 // global variables
-var zoom = 19.8;
-var map, rectangeMap1, globalLat, globalLon, cropSize, requestAddress, lang, resultGlobal, Area
-var checker
+let zoom = 17;
+let map, rectangle, globalLat, globalLon, requestAddress, lang, resultGlobal;
+let checker;
 lang = 'RU'
-resultGlobal = ''
-cropSize = 25
+
+// класс с информацией о результатах анализа
+var info, globalPoly, request, geocoder;
+let checkTime = 10000;
+var jstsGeometry = new jsts.geom.GeometryFactory();
 
 $('document').ready(function (result) {
-    var lng, lat;
-    lng = 48.707067;
-    lat = 44.5169033;
 
-    window.map = initMap(lat, lng);
-    window.map.setMapTypeId('hybrid');
-    // init button for request
-    sentRequest('#submitBtn');
 
+    globalLat = 55.7531979;
+    globalLon = 37.618598;
+
+
+    map = initMap(globalLat, globalLon, zoom);
+    map.setMapTypeId('hybrid');
+    setDrawingTools(map);
+    map.addListener('zoom_changed', function () {
+        $('.gmnoprint:eq(2)').css({
+            'margin-left': '18px'
+        })
+    })
+
+    geocoder = new google.maps.Geocoder();
     // Inputs for geocoding
-    setGeoCoder(window.map, 'pac-input');
-    //setGeoCoder(window.map, 'pac-input-top', false);
-    // set inputs for different blocks
-
+    setGeoCoder(map, 'pac-input');
     initializeInputAddress('#pac-input', '#search_container');
-    ////////////
-    //submit button end------------------------------------------------
 
     // language change
     $('.lng').click(function () {
@@ -36,42 +41,19 @@ $('document').ready(function (result) {
         }
     })
     $('#RU').addClass('lang-text')
-    /////init different functions
-    //slideBtn();
-    //slideInfo();
-    //initButtons();
-    if ( !window.location.href.includes('share') ){
-        $(".ui.sidebar.right").sidebar({
-        'context': '#map'
-        });    
-    }
-    
-    $('#requests').css({
-        display: 'none'
-    });
-    //$('.ui.sidebar.right').sidebar({context: '#map'})
 
+    // init button for request
+    sentRequest('#submitBtn');
 
-    $('#request_menu').click(function () {
-        if ($('#requests').css('display') == "block") {
-            $('#requests').toggle('toggle');
-        }
-        $('#search_container').toggle('toggle');
-    })
-
-    $('#request_list').click(function () {
-        if ($('#search_container').css('display') == "block") {
-            $('#search_container').toggle('toggle');
-        }
-        $('#requests').toggle('toggle');
-        //$('#search_container').transition('fade down');
-    })
 
     get_requests();
-    setInterval(get_requests(), 20000);
-    
-    
+    setInterval(function () {
+        get_requests()
+    }, 20000);
 
+
+    info = new information();
+    request = new userRequest();
 });
 
 // set inputs for different blocks
@@ -85,108 +67,169 @@ function initializeInputAddress(id, parentId) {
 }
 
 
-function sentRequest(buttonId) {
-    $(buttonId).click(function () {
 
-        if (Number(window.globalLat) && Number(window.globalLon)) {
-            // get coords
-            var lat = window.globalLat
-            var lon = window.globalLon
-            var location, bounds
-            var destination = $(window).height()
-
-            // if it first request by user
-            if( !$('#right_sidebar').hasClass('visible') ){
-                $('#right_sidebar').toggle('visible');
-            } 
-            
-            //$('#right_sidebar').toggle('visible');
-            $('#right_loader').dimmer('show');
-
-            //$('.container').css({display: 'flex'});
-
-            //post coordinates to server
-            if (!window.requestAddress) { // if dont have a geoloc coords
-                window.requestAddress = "Неизвестный адрес"
-            }
-            $.post('/main', {
-                'lat': window.globalLat,
-                'lon': window.globalLon,
-                'address': window.requestAddress
-            }, function (result) {
-
-                if (result == 'wait') {
-                    //maske checker
-                    setTimeout(check_results(window.globalLat, window.globalLon), 5000);
-                } else {
-                    //write results from RESULT
-                    show_results(result)
-                    $('#right_loader').dimmer('hide');
-                }
-            }).fail(function () {
-                $.post('/error', {
-                    'descr': 'Невозможно выполнить запрос<br> Can\'t make request to server'
-                })
-            });
-        } else {
-            alert('Вы не выбрали место');
-        }
-        //sheck lat lon end
-    })
-}
 
 function get_requests() {
-    $.post('/request_list', function (result) {
+    $.post('/archive', function (result) {
         insertRequesstList(result)
     })
 }
 
-function check_results(lat, lon) {
-    $.post('/check/lat:' + lat + '_lon:' + lon, function (result) {
-        if (result != 'wait') {
-            window.resultGlobal = result;
-            clearTimeout(window.checker);
-            show_results(result);
-            $('#right_sidebar').toggle('visible');
-            $('#right_loader').dimmer('hide');
-        } else {
-            window.checker = setTimeout(check_results(window.globalLat, window.globalLon), 5000);
+//////////////////////ОБНОВИТЬ!
+function check_results(locationName) {
+    $.ajax({
+        type: "POST",
+        async: false,
+        url: '/check',
+        data: {
+            'location': locationName
+        },
+        dataType: 'json',
+        timeout: 0
+    }).done(function (result) {
+        console.log("check complete", result)
+        if (result.status == 200 && result.responseText == 'wait') {
+            console.log('second CHECK not ready 10 s');
+        } else if (result.hasOwnProperty("paths")) {
+            resultGlobal = result;
+            clearInterval(checker);
+            showResults(resultGlobal);
         }
+    }).fail(function (error) {
+        showErrorMessage(error)
+    });
+    // $.post('/check/location:' + locationName).done().fail()
+}
+
+function makePost(coords, classes, locationName) {
+    $('#loader').css({
+        display: 'block'
+    });
+    $('#preloader').css({
+        display: 'block'
+    });
+
+    if ($("#welcome")) {
+        $("#welcome").remove()
+    }
+    if ($("#result")) {
+        $("#result").css({
+            display: 'none'
+        });
+    }
+    $('#submitBtn').addClass('disabled');
+    console.log(locationName);
+
+    $.ajax({
+        type: "POST",
+        async: false,
+        url: '/analyze',
+        dataType: 'json',
+        timeout: 0,
+        data: {
+            values: JSON.stringify({
+                'arrayOfCoords': coords,
+                'location': locationName,
+                'classes': classes
+            })
+        },
+        complete: function (answer) {
+            console.log(answer)
+            if (answer.responseText == 'wait') {
+                console.log(answer.responseText);
+
+
+                checker = setInterval(function () {
+                        check_results(request.locationName);
+                        console.log('check ', request.locationName);
+                    },
+                    checkTime);
+                console.log('interval 10 first post');
+
+            }
+        }
+
+    }).done(function (answer) {
+        showResults(answer);
     })
+}
+
+
+function showResults(result_from_server) {
+
+
+    $('#loader').css({
+        display: 'none'
+    });
+    $('#preloader').css({
+        display: 'none'
+    });
+    $("#map_overlay").css({
+        "overflow-y": "scroll"
+    })
+
+    if (!$('#result').length) {
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: "/results",
+            success: function (resultHtml) {
+                $('#map_overlay').append($(resultHtml))
+            }
+        })
+        // window.location.href = window.location.href + "results";
+    } else {
+        $("#result").css({
+            display: 'block'
+        });
+    }
+
+
+    $('#loader').css({
+        display: 'none'
+    });
+    $('#submitBtn').removeClass('disabled');
+
+
+    drawResult(map, result_from_server);
+    userArea.setMap(null);
+    pths = userArea.getPaths();
+    new google.maps.Polygon({
+        paths: pths,
+        fillOpacity: 0,
+        strokeColor: "red",
+        strokeOpacity: 0.6,
+        map: map
+    })
+
+    insertRequesstList(result_from_server['requests']);
+
+    // form links for share
+    var url_share = new String(window.location.href);
+    console.log(url_share);
+
+    //    share_text = ""
+
+    ///////////////////////////////////////
+    //        "<div id='facebook' class='ui column'><a href='https://www.facebook.com/sharer/sharer.php?u=" + url_share + " target='_blank'><img src='static/css/icons/facebook.png'></a></div>"))
+    /////////////////////////////////////
+    //    $('#vk').html(VK.Share.button({
+    //        url: url_share
+    //    }, {
+    //        type: 'custom',
+    //        text: "<img src='static/css/icons/vk.png'>"
+    //    }))
+    //    $('#google').html(google_share)
+
 
 }
 
-function show_results(result_from_server) {
-    var lat = Number(result_from_server['lat'])
-    var lng = Number(result_from_server['lon'])
-    var location = {
-        lat: Number(lat),
-        lng: Number(lng)
-    };
-    window.resultGlobal = result_from_server
-    // form links for share
-    var url_share = window.location.href + 'share/lat:' + lat + '_lon:' + lng + "&ln=" + window.lang;
-    var google_share = '<a href="https://plus.google.com/share?url={' + url_share + '}" onclick="shareGoogle()"><img src="https://www.gstatic.com/images/icons/gplus-32.png" alt="Share on Google+"/></a>'
-
-    drawResult(window.map, result_from_server); //Возвращает площадь 1 маленького квадрата
-    //window.Area = area;
-
-    insertInfo(result_from_server, window.Area, window.lang);
-    insertRequesstList(result_from_server['requests']);
-    //    share_text = ""
-    //    if (window.lang == 'RU'){share_text = '<p>Поделиться</p>'} else{share_text = '<p>Share</p>'}
-    $('#links_container').append($("<div id='vk' class='ui column'></div>" +
-        "<div id='google' class='ui column'></div>" +
-        "<div id='facebook' class='ui column'><a href='https://www.facebook.com/sharer/sharer.php?u=" + url_share + " target='_blank'><img src='static/css/icons/facebook.png'></a></div>"))
-    $('#vk').html(VK.Share.button({
-        url: url_share
-    }, {
-        type: 'custom',
-        text: "<img src='static/css/icons/vk.png'>"
-    }))
-    $('#google').html(google_share)
-    //    $('#share').css('justify-content: center');
-
+function showErrorMessage(error) {
+    console.log("check failed", error);
+    $(".message.negative").removeClass("hidden");
+    $(".message.negative .button").click(function () {
+        document.location = "/"
+    })
 }
 
 // form link for google
@@ -196,64 +239,126 @@ function shareGoogle() {
 }
 
 function drawResult(map, json) {
-    var lat = Number(json['lat'])
-    var lng = Number(json['lon'])
-    // var area;
-    var latLng = new google.maps.LatLng(lat, lng)
-    // get coords for big rectangle - area
-
-    var boundsOfRect = getBoundsOfArea(latLng, map)
-    /////////////////////////
-
-    ///////////////////////////////
-    var pixRecX = Math.abs((boundsOfRect['l']['j'] - boundsOfRect['l']['l'])) / (100)
-    var pixRecY = Math.abs((boundsOfRect['j']['j'] - boundsOfRect['j']['l'])) / (100)
-
-    var areaPoints = [
-            new google.maps.LatLng(lat, lng),
-            new google.maps.LatLng(lat, lng - pixRecY),
-            new google.maps.LatLng(lat - pixRecX, lng),
-            new google.maps.LatLng(lat - pixRecX, lng - pixRecY)]
-
-    //area = google.maps.geometry.spherical.computeArea(areaPoints)
-
-    //lat увеличивается снизу-вверх - ось Y значит не обнуляется в цикле
-    //lon увеличивается слева-направо - ось Х - значит обнуляется каждый цикл
-    // draw all rectangles
-    var leftTopY = lng + 50 * pixRecY // не обнуляется
-    for (var i = 99; i >= 0; i--) {
-        var leftTopX = lat - 48 * pixRecX // обнуляется каждый цикл
-        for (var j = 99; j >= 0; j--) {
-
-            bounds = {
-                north: leftTopX,
-                south: leftTopX - pixRecX,
-                east: leftTopY,
-                west: leftTopY - pixRecY
-            }
-            // if result in this coord
-            if (json[+(i) + ':' + (j)]['delta']) {
-                color = json[+(i) + ':' + (j)]['color']
-                addRectangle(map, bounds, color)
-            }
-            leftTopX += pixRecX;
+    classProp = {
+        'trees': {
+            color: "#3CA0D0",
+            css_color: "trees_color",
+            header: "Деревья",
+            icon: "tree",
+        },
+        'cars': {
+            color: "#FFFA00",
+            css_color: "cars_color",
+            header: "Автомобили",
+            icon: "car",
+        },
+        'garage': {
+            color: "#FF5A40",
+            css_color: "garage_color",
+            header: "Гаражи",
+            icon: "cube",
+        },
+        'water': {
+            color: "#B90091",
+            css_color: "water_color",
+            header: "Вода",
+            icon: "tint"
         }
-        leftTopY -= pixRecY;
     }
-    map.setZoom(18);
-    map.setCenter({
-        lat: lat,
-        lng: lng
-    });
-    //$('.container').css({display: 'none'});
-    // return area;
+    let blockNameWithResults = "#result .segment"
+    $(blockNameWithResults).empty()
+
+    let res = json['paths']
+    let jstsUserSelectedArea = request.getJstsPoly();
+
+    for (className in res) {
+        //let copyUserAreaForUnion = jstsUserSelectedArea;
+        let pathClass = [];
+        let countOfAreas = 0;
+        let commonArea = 0;
+
+        res[className].forEach(function (contour) {
+            pathClass.push(contour.map(function (val) {
+                return {
+                    "lat": val[0],
+                    "lng": val[1]
+                }
+            }))
+        })
+        if (pathClass.length) {
+
+            var classPaths = new google.maps.Polygon({
+                paths: pathClass,
+                fillColor: classProp[className].color,
+                fillOpacity: 0.23,
+                strokeColor: classProp[className].color,
+                strokeOpacity: 0.7,
+                map: map
+            })
+            // console.log(classPaths)
+            classPaths.getPaths().getArray().forEach(function (path) {
+                commonArea += google.maps.geometry.spherical.computeArea(path)
+            })
+            countOfAreas = classPaths.getPaths().getArray().length
+        }
+
+        $(blockNameWithResults).append(
+            $('<div class="ui '+classProp[className].css_color+' ribbon label"><i class="' + classProp[className].icon + ' icon"></i>' + classProp[className].header + '</div>')).append($('<div class="ui list"><div class="item">\
+                Общая площадь найденных объектов: ' + commonArea.toFixed(2) + ' m<sup><small>2</small></sup></div>\
+                <div class="item">Всего найденных территорий: ' + countOfAreas + '</div></div>'))
+
+
+
+    } //class
 }
 
+function fromJstsCoordinatesToGoogle(jstsCoords) {
+    let googleCoordinates = []
+    for (let latlng in jstsCoords) {
+        googleCoordinates.push(new google.maps.LatLng(jstsCoords[latlng].x, jstsCoords[latlng].y))
+    }
+    googleCoordinates.push(googleCoordinates[0])
+    return googleCoordinates
+}
+
+
+function drawIntersectionArea(map, polygon) {
+    var coords = polygon.getCoordinates().map(function (coord) {
+        return {
+            lat: coord.x,
+            lng: coord.y
+        };
+    });
+    coords.push(coords[0])
+    var intersectionArea = new google.maps.Polygon({
+        paths: coords,
+        strokeColor: '#00FF00',
+        strokeOpacity: 0.8,
+        strokeWeight: 4,
+        fillColor: '#00FF00',
+        fillOpacity: 0.35
+    });
+    intersectionArea.setMap(map);
+}
+
+
+
+function createJstsPolygon(geometryFactory, polygon) {
+    var path = polygon.getPath();
+    var coordinates = path.getArray().map(function name(coord) {
+        return new jsts.geom.Coordinate(coord.lat(), coord.lng());
+    });
+    coordinates.push(coordinates[0]);
+    var shell = geometryFactory.createLinearRing(coordinates);
+    return geometryFactory.createPolygon(shell);
+}
+
+
+
 // insert info to result block
-function insertInfo(result, area, lang) {
+function insertInfo(info, lang) {
     $('#information').empty();
-    var commonObjCount = Math.pow(2500 / window.cropSize, 2) //сетка
-    var oneSegmentArea = area / commonObjCount
+
     var enToRu = {
         'tree': 'Деревья'
     };
@@ -278,60 +383,63 @@ function insertInfo(result, area, lang) {
     $('#information').append($('<h4 class="ui header center aligned item">' + dictionary[0][lng] + '</h4>'))
     //$('#info h4').after($('<div id="info_list" ></div>'))
     path_img = 'static/css/icons/'
-        if ( window.location.href.includes('share') ){
-            path_img = '../' + path_img;
-        }
+    if (window.location.href.includes('share')) {
+        path_img = '../' + path_img;
+    }
     //
     $('#information').append($('<div class="ui grid middle aligned"></div>'))
-    
+
     $('#information .ui.grid').append($('<div class="row"> \
-                               <div class="three wide column"> <img src="'+path_img+'grid.png"></div>' + 
-                                '<div class="thirteen wide column"><p>' + dictionary[1][lng] + area.toFixed(2) + ' m<sup><small>2</small></sup></p></div>\
+                               <div class="three wide column"> <img src="' + path_img + 'grid.png"></div>' +
+        '<div class="thirteen wide column"><p>' + dictionary[1][lng] + info.squareArea.toFixed(2) + ' m<sup><small>2</small></sup></p></div>\
                                       </div>'))
-    
+
     //$('#information').append($('<div class="one wide column"> <img src="'+path_img+'grid.png"></div>' + '<div class="four wide column><p>' + dictionary[1][lng] + //area.toFixed(2) + ' m<sup><small>2</small></sup></p></div>'))
     //
-    
-    $('#information .ui.grid').append($('<div class="row">\
-                    <div class="three wide column"> <img src="'+path_img+'frames.png"></div>' + '<div class="thirteen wide column"><p>' + dictionary[2][lng] + result['objects']['tree']['count'] + '</p></div>\
-                                        </div>'))
-    
-    //$('#information .ui.grid').append($());
-    
-    $('#information .ui.grid').append($('<div class="row"> \
-                               <div class="three wide column"> <img src="'+path_img+'forest.png"></div>' + 
-                                '<div class="thirteen wide column"><p>' + dictionary[3][lng] +
-                            (result['objects']['tree']['count'] * oneSegmentArea).toFixed(2) + 
-                                      ' m<sup><small>2</small></sup> </p> </div></div>'));
 
-    var abinVal = ((result['objects']['tree']['count'] * oneSegmentArea) / (area)).toFixed(2)
+    $('#information .ui.grid').append($('<div class="row">\
+                    <div class="three wide column"> <img src="' + path_img + 'frames.png"></div>' + '<div class="thirteen wide column"><p>' + dictionary[2][lng] + areaCount + '</p></div>\
+                                        </div>'))
+
+    //$('#information .ui.grid').append($());
+
+    $('#information .ui.grid').append($('<div class="row"> \
+                               <div class="three wide column"> <img src="' + path_img + 'forest.png"></div>' +
+        '<div class="thirteen wide column"><p>' + dictionary[3][lng] +
+        (info.areaOfObjects).toFixed(2) +
+        ' m<sup><small>2</small></sup> </p> </div></div>'));
+    //
+    info.setAbin((info.areaOfObjects / info.squareArea).toFixed(2));
     var abinText;
-    if (abinVal < 0.1) {
+    if (info.Abin < 0.1) {
         abinText = Abin[0][lng];
-    } else if (abinVal >= 0.1 && abinVal < 0.6) {
+    } else if (info.Abin >= 0.1 && info.Abin < 0.6) {
         abinText = Abin[1][lng];
     } else {
         abinText = Abin[2][lng];
     }
 
-    //
+
     $('#information .ui.grid').append($('<div class="row"> \
-                               <div class="three wide column"> <img src="'+path_img+'quality.png"></div>' + 
-                                '<div class="thirteen wide column"><p>'+ dictionary[4][lng] +
-        abinVal + ' (Abin) - ' + abinText + '</p></div></div>'));
-    //
+                               <div class="three wide column"> <img src="' + path_img + 'quality.png"></div>' +
+        '<div class="thirteen wide column"><p>' + dictionary[4][lng] +
+        info.Abin + ' (Abin) - ' + abinText + '</p></div></div>'));
+    //    //
+
     $('#information .ui.grid').append($('<div class="row"> \
-                               <div class="three wide column"> <img src="'+path_img+'tree.png"></div>' + 
-                                '<div class="thirteen wide column"><p>'+ dictionary[5][lng] +
-        Math.round((result['objects']['tree']['count'] * oneSegmentArea) / (10.7)) + '</p></div></div>'))
+                               <div class="three wide column"> <img src="' + path_img + 'tree.png"></div>' +
+        '<div class="thirteen wide column"><p>' + dictionary[5][lng] +
+        Math.round(info.areaOfObjects / 20) + '</p></div></div>'))
     //
-    $('#information .ui.grid').append($('<div class="row"> \
-                               <div class="three wide column"> <img src="'+path_img+'tree-silhouette.png"></div>' + 
-                                '<div class="thirteen wide column"><p>' + dictionary[6][lng] + '</p></div></div>'))
+    //    $('#information .ui.grid').append($('<div class="row"> \
+    //                               <div class="three wide column"> <img src="'+path_img+'tree-silhouette.png"></div>' + 
+    //                                '<div class="thirteen wide column"><p>' + dictionary[6][lng] + '</p></div></div>'))
 }
 
+
+
 function insertRequesstList(list) {
-    $('#requests row').remove();
+    $('#requests .row').remove();
     var text;
     if (window.lang == "RU") {
         text = 'Последние запросы'
@@ -339,12 +447,27 @@ function insertRequesstList(list) {
         text = 'Last requests'
     }
     //$('#requests').append('<h4 class="ui header item aligned center"></h4>')
+    $('#archive').empty()
     for (el in list) {
-        $('#requests .two.columns').append($('<div class="row">' +
-                                '<div class="column">' + list[el][0] + '</div>' +
-                                '<div class="column">' + list[el][1] + '</div>' +
-                                '</div>'))
+
+        $('#archive').append($(
+            '<div class="ui basic button row" value=" ' + list[el][0] + ' "> ' +
+            '<div class="column">' + list[el][0] + '</div> </div>'))
     }
+
+    //archive of requests - click
+    $('#archive .button').click(function () {
+        var request_val = this.getAttribute('value').slice(1, -1);
+        console.log(request_val)
+        $.post({
+            url: '/ready',
+            data: {
+                'location': request_val
+            }
+        }).done(function (result) {
+            showResults(result)
+        }).fail()
+    })
 }
 
 
@@ -392,7 +515,7 @@ function project(latLng) {
 }
 
 function getBoundsOfArea(center, map) {
-    var imgSize = 1675
+    var imgSize = 512
     var scale = Math.pow(2, zoom);
 
     var proj = map.getProjection();
@@ -416,18 +539,19 @@ function inrange(min, number, max) {
     };
 }
 
-function initMap(longitude, latitude) {
+function initMap(latitude, longitude, zoom) {
     var location = {
         lat: Number(latitude),
         lng: Number(longitude)
     };
     var map = new google.maps.Map(
         document.getElementById('map'), {
-            zoom: 17,
+            zoom: zoom,
             center: location
         });
     return map
 }
+
 
 
 
@@ -441,15 +565,10 @@ function setGeoCoder(map, id, main) {
             placeIdOnly: true
         });
     autocomplete.bindTo('bounds', map);
-    //autocomplete.setFields(
-    //   ['address_components', 'geometry', 'icon', 'name']);
-    //        if (main){
-    //            map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-    //            google.maps.ControlPosition
-    //        }
-    var geocoder = new google.maps.Geocoder;
+
 
     autocomplete.addListener('place_changed', function () {
+
         var place = autocomplete.getPlace();
         if (!place.place_id) {
             return;
@@ -462,62 +581,95 @@ function setGeoCoder(map, id, main) {
                 window.alert('Geocoder failed due to: ' + status);
                 return;
             }
-            //map.setZoom(17);
+            //удаляем квадрат из предыдущ. поиска
+            if (rectangle) {
+                rectangle.setMap(null);
+            }
 
+            map.setZoom(zoom);
             map.setCenter(results[0].geometry.location);
             window.requestAddress = results['0'].formatted_address
             lat = results[0].geometry.location.lat();
             lng = results[0].geometry.location.lng();
 
-            // get center of tile
-            //
-            //
-            var scale = 1 << 20;
-            var tileSize = 256
-            var worldCoordinate = project(new google.maps.LatLng(lat, lng));
-            // set lat lng to center of tile
-            var tileCoordinate = new google.maps.Point(
-                Math.floor(worldCoordinate.x * scale / tileSize),
-                Math.floor(worldCoordinate.y * scale / tileSize)
-            );
-            pixels_x = worldCoordinate.x * scale
-            pixels_y = worldCoordinate.y * scale
-            pixels_x = (Number((pixels_x - pixels_x % tileSize).toFixed(0)) + 128) / scale
-            pixels_y = (Number((pixels_y - pixels_y % tileSize).toFixed(0)) + 128) / scale
-            var testCoord = new google.maps.Point(pixels_x, pixels_y)
-            lat = window.map.getProjection().fromPointToLatLng(testCoord).lat()
-            lng = window.map.getProjection().fromPointToLatLng(testCoord).lng()
-            // Set the position of the marker using the place ID and location.
-
-            var boundsOfArea = getBoundsOfArea(new google.maps.LatLng(Number(lat), Number(lng)), window.map)
-            //console.log('bounds = ', boundsOfArea)
-            var path = [new google.maps.LatLng(boundsOfArea.j.j, boundsOfArea.l.j),
-                          new google.maps.LatLng(boundsOfArea.j.l, boundsOfArea.l.l),
-                ]
-            var dist = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
-            window.Area = dist * dist;
-            // bounds: boundsOfArea,
-            var opts = {
-                bounds: boundsOfArea,
-                strokeOpacity: 0.8,
-                fillColor: '#A8E4A0',
-                fillOpacity: 0.1,
-                strokeColor: '#A8E4A0',
-                map: window.map,
-                editable: false
-            }
-            if (window.rectangeMap1) {
-                window.rectangeMap1.setMap(null);
-            }
-            window.rectangeMap1 = new google.maps.Rectangle(opts);
-
-            window.globalLat = lat
-            window.globalLon = lng
+            //            addSearchRectangle(lat, lng, true)
+            //            window.globalLat = lat;
+            //            window.globalLon = lng;
 
         });
     });
 }
 
+// set name of userArea
+function backGeoCode(lat, lng) {
+    geocoder.geocode({
+        'location': new google.maps.LatLng(lat, lng)
+    }, function (results, status) {
+        if (status == 'OK') {
+            if (results[1]) {
+                request.locationName = results[1].formatted_address;
+                console.log(results);
+                // return placeName;
+            }
+        } else {
+            request.locationName = "Неизвестный адрес " + Math.round(Math.random() * 100);
+        }
+    });
+}
+
+
+function addSearchRectangle(lat, lng, draw) {
+    var scale = 1 << zoom;
+    var tileSize = 256;
+    var worldCoordinate = project(new google.maps.LatLng(lat, lng));
+    // set lat lng to center of tile
+    var tileCoordinate = new google.maps.Point(
+        Math.floor(worldCoordinate.x * scale / tileSize),
+        Math.floor(worldCoordinate.y * scale / tileSize)
+    );
+
+    var leftTopX = tileCoordinate.x - 1;
+    var leftTopY = tileCoordinate.y - 1;
+
+    var rightBotX = tileCoordinate.x + 2;
+    var rightBotY = tileCoordinate.y + 2;
+
+    var latLngLT = num2deg(leftTopX, leftTopY, zoom);
+    var latLngRB = num2deg(rightBotX, rightBotY, zoom);
+
+    // Находим площадь квадрата
+    var path = [new google.maps.LatLng(latLngLT[0], latLngLT[1]),
+                  new google.maps.LatLng(latLngRB[0], latLngRB[1]),
+        ]
+    squareLen = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
+    info.setSquareArea(squareLen * squareLen);
+    // bounds: boundsOfArea,
+    var opts = {
+        bounds: {
+            north: latLngLT[0],
+            south: latLngRB[0],
+            east: latLngRB[1],
+            west: latLngLT[1]
+        },
+        strokeOpacity: 0.6,
+        fillColor: '#A8E4A0',
+        fillOpacity: 0.1,
+        strokeColor: '#A8E4A0',
+        map: window.map,
+        editable: false
+    }
+    if (draw) {
+        window.rectangle = new google.maps.Rectangle(opts);
+    }
+}
+
+function num2deg(xtile, ytile, zoom) {
+    var n = Math.pow(2.0, zoom)
+    var lon_deg = xtile / n * 360.0 - 180.0
+    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * ytile / n)))
+    var lat_deg = 180.0 * (lat_rad / Math.PI)
+    return [lat_deg, lon_deg]
+}
 
 function changeLanguage(lang) {
     //$('#search_container').empty();
@@ -571,7 +723,168 @@ function changeLanguage(lang) {
 
     }
 
-    if (window.resultGlobal != "") {
-        insertInfo(window.resultGlobal, window.Area, window.lang);
+    if (resultGlobal != "") {
+        insertInfo(info, window.lang);
     }
+}
+
+function mapResizeEvent() {
+    $('#show_hide_btn').css({
+        display: 'block',
+        transition: '0.5s'
+    })
+    $('#show_hide_btn').css({
+        'margin-right': $('#right_sidebar').width()
+    });
+    $(window).resize(function () {
+        if ($('#right_sidebar').hasClass('visible')) {
+            $('#show_hide_btn').css({
+                'margin-right': $('#right_sidebar').width()
+            });
+            $('.gm-style').css({
+                width: 100 - ($('#right_sidebar').width() / $('#map').width() * 100) + '%'
+            })
+        }
+    })
+
+    $('#show_hide_btn').click(function () {
+        if ($('#right_sidebar').hasClass('visible')) {
+            $('.gm-style').css({
+                width: '100%'
+            });
+
+            $('#right_sidebar').removeClass('visible');
+
+            $('#show_hide_btn').css({
+                'margin-right': 0
+            });
+            $('#show_hide_btn  i').removeClass('right');
+            $('#show_hide_btn  i').addClass('left');
+        } else {
+            $('.gm-style').css({
+                width: 100 - Math.round(($('#right_sidebar').width() / $('#map').width()) * 100) + '%'
+            });
+            $('#right_sidebar').addClass('visible');
+
+            $('#show_hide_btn').css({
+                'margin-right': $('#right_sidebar').width()
+            });
+            $('#show_hide_btn  i').removeClass('left');
+            $('#show_hide_btn  i').addClass('right');
+        }
+    })
+
+}
+
+
+class information {
+
+    constructor() {
+        this.treesCount = 0;
+        this.areaCount = 0;
+        this.areaOfObjects = 0;
+        this.Abin = 0;
+        this.squareArea = 0;
+    }
+
+    //seters
+    setTreesCount(count) {
+        this.treesCount = count;
+    }
+    setAreaCount(count) {
+        this.areaCount = count;
+    }
+    setAreaOfObjects(area) {
+        this.areaOfObjects = area;
+    }
+    setAbin(abin) {
+        this.Abin = abin;
+    }
+    setSquareArea(area) {
+        this.squareArea = area;
+    }
+
+    //geters
+    getTreesCount() {
+        return this.treesCount
+    }
+    getAreaCount() {
+        return this.areaCount
+    }
+    getAreaOfObjects() {
+        return this.areaOfObjects
+    }
+    getAbin() {
+        return this.Abin
+    }
+    getSquareArea() {
+        return this.squareArea
+    }
+
+}
+
+
+class userRequest {
+    constructor() {
+        this.classList = [];
+        this.area;
+        this.locationName;
+    }
+
+    toggleClass(className) {
+        if (this.classList.indexOf(className) > -1) {
+            this.classList.splice(this.classList.indexOf(className), 1)
+        } else {
+            this.classList.push(className);
+        }
+        return this.classList;
+    }
+
+
+
+    setArea(newArea) {
+        this.area = newArea;
+        this.setLocationName();
+        return this.area;
+    }
+
+    setLocationName() {
+        if (this.area) {
+            let lat = 0,
+                lng = 0;
+            let normalArray = this.getNormalizeAreaArray();
+            normalArray.forEach(function (LatLng) {
+                lat += LatLng[0];
+                lng += LatLng[1];
+            })
+            lat /= normalArray.length;
+            lng /= normalArray.length;
+
+            backGeoCode(lat, lng);
+            //            console.log(this.locationName);
+            // this.locationName = // Math.round(Math.random() * 100)
+            //return this.locationName;
+        }
+    }
+
+    getNormalizeAreaArray() {
+        let normalArray = [];
+        this.area.getPath().j.forEach(function (LatLng) {
+            normalArray.push([LatLng.lat(), LatLng.lng()])
+        })
+        return normalArray;
+    }
+
+    getArea() {
+        return this.area;
+    }
+
+    getClasses() {
+        return this.classList;
+    }
+
+    getJstsPoly() {
+        return createJstsPolygon(jstsGeometry, this.area)
+    }
+
 }
