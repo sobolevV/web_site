@@ -1,29 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b96227dd-237c-4abb-929c-f298c7dcc8f5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/Vadim.xml" afterDir="false" />
+    <list default="true" id="b96227dd-237c-4abb-929c-f298c7dcc8f5" name="Default Changelist" comment="new version">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/48.708068371808565_44.51333999633789.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/48.739776393562906_44.54732894897461.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/55.767979472925674_37.55521774291992.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/geckodriver.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/module/classifyD-T_USE.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/module/geckodriver.log" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/module/get_tile.py" beforeDir="false" afterPath="$PROJECT_DIR$/module/get_tile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/module/neuro_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/module/neuro_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/module/new_model_25_bright.hdf5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/module/ya_maps_D-T_USE.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/module/path_to_tile_indexes.py" beforeDir="false" afterPath="$PROJECT_DIR$/module/path_to_tile_indexes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/neuro_serv.py" beforeDir="false" afterPath="$PROJECT_DIR$/neuro_serv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/secondMap.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/task.py" beforeDir="false" afterPath="$PROJECT_DIR$/task.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/error.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/error.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Новый текстовый документ.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/result.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/result.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -95,8 +81,8 @@
           <entry key="dummy" value="20" />
           <entry key="html" value="160" />
           <entry key="js" value="1290" />
-          <entry key="py" value="14952" />
-          <entry key="txt" value="20" />
+          <entry key="py" value="15417" />
+          <entry key="txt" value="63" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
@@ -104,8 +90,8 @@
           <entry key="CSS" value="327" />
           <entry key="HTML" value="160" />
           <entry key="JavaScript" value="1290" />
-          <entry key="PLAIN_TEXT" value="40" />
-          <entry key="Python" value="15105" />
+          <entry key="PLAIN_TEXT" value="83" />
+          <entry key="Python" value="15570" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -114,7 +100,7 @@
           <entry key="html" value="10" />
           <entry key="js" value="9" />
           <entry key="png" value="2" />
-          <entry key="py" value="193" />
+          <entry key="py" value="200" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -123,7 +109,7 @@
           <entry key="HTML" value="10" />
           <entry key="Image" value="2" />
           <entry key="JavaScript" value="9" />
-          <entry key="Python" value="193" />
+          <entry key="Python" value="200" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.lifecycle.project">
@@ -134,10 +120,10 @@
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="7" />
           <entry key="project.open.time.5" value="13" />
-          <entry key="project.open.time.6" value="11" />
+          <entry key="project.open.time.6" value="13" />
           <entry key="project.open.time.7" value="5" />
           <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="65" />
+          <entry key="project.opened" value="67" />
         </counts>
       </usages-collector>
     </session>
@@ -150,8 +136,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/neuro_serv.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-197">
-              <caret line="20" selection-start-line="20" selection-end-line="20" />
+            <state relative-caret-position="866">
+              <caret line="85" column="13" selection-start-line="85" selection-start-column="8" selection-end-line="85" selection-end-column="13" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -159,24 +145,47 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/module/neuro_processing.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/module/get_tile.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="82">
-              <caret line="191" column="45" selection-start-line="191" selection-start-column="45" selection-end-line="191" selection-end-column="45" />
+            <state relative-caret-position="272">
+              <caret line="104" column="6" selection-start-line="104" selection-start-column="6" selection-end-line="104" selection-end-column="6" />
               <folding>
-                <element signature="e#0#18#0" expanded="true" />
-                <marker date="1554930391688" expanded="true" signature="8181:9003" ph="..." />
+                <element signature="e#0#36#0" expanded="true" />
+                <marker date="1555092379856" expanded="true" signature="832:1124" ph="..." />
+                <marker date="1555092379856" expanded="true" signature="3103:3187" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/module/path_to_tile_indexes.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1219">
+              <caret line="55" column="11" selection-start-line="55" selection-start-column="6" selection-end-line="55" selection-end-column="11" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/module/neuro_processing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="212">
+              <caret line="152" column="66" selection-start-line="152" selection-start-column="66" selection-end-line="152" selection-end-column="66" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+                <marker date="1555091675953" expanded="true" signature="7798:8572" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="302">
-              <caret line="73" column="25" selection-start-line="73" selection-start-column="25" selection-end-line="73" selection-end-column="25" />
+            <state relative-caret-position="464">
+              <caret line="79" column="36" selection-start-line="79" selection-start-column="36" selection-end-line="79" selection-end-column="36" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
@@ -185,19 +194,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/static/css/style.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="236">
-              <caret line="56" column="12" selection-start-line="56" selection-start-column="1" selection-end-line="56" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/static/js/script.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6624">
-              <caret line="290" column="21" selection-start-line="290" selection-start-column="21" selection-end-line="290" selection-end-column="21" />
+            <state relative-caret-position="597">
+              <caret line="295" column="21" selection-start-line="295" selection-start-column="21" selection-end-line="295" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -213,10 +213,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>resize</find>
-      <find>mapResizeEvent()</find>
-      <find>logo</find>
-      <find>results</find>
       <find>request</find>
       <find>req</find>
       <find>get_tile</find>
@@ -243,6 +239,10 @@
       <find>Polyg</find>
       <find>predict_class</find>
       <find>tile_index_X</find>
+      <find>lum</find>
+      <find>denoise_fill_image</find>
+      <find>prin</find>
+      <find>print</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -270,12 +270,12 @@
         <option value="$PROJECT_DIR$/templates/result.html" />
         <option value="$PROJECT_DIR$/task.py" />
         <option value="$PROJECT_DIR$/templates/index.html" />
-        <option value="$PROJECT_DIR$/module/path_to_tile_indexes.py" />
-        <option value="$PROJECT_DIR$/module/get_tile.py" />
-        <option value="$PROJECT_DIR$/neuro_serv.py" />
-        <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/static/css/style.css" />
+        <option value="$PROJECT_DIR$/module/path_to_tile_indexes.py" />
+        <option value="$PROJECT_DIR$/neuro_serv.py" />
         <option value="$PROJECT_DIR$/module/neuro_processing.py" />
+        <option value="$PROJECT_DIR$/module/get_tile.py" />
+        <option value="$PROJECT_DIR$/__init__.py" />
       </list>
     </option>
   </component>
@@ -363,7 +363,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.neuro_serv">
+  <component name="RunManager" selected="Python.__init__">
     <configuration name="LatLng_to_Tile" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="web_site" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -478,8 +478,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.neuro_serv" />
         <item itemvalue="Python.__init__" />
+        <item itemvalue="Python.neuro_serv" />
         <item itemvalue="Python.get_tile" />
         <item itemvalue="Python.path_to_tile_indexes" />
         <item itemvalue="Python.LatLng_to_Tile" />
@@ -511,7 +511,21 @@
       <option name="project" value="LOCAL" />
       <updated>1541545634501</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="new version">
+      <created>1555004305405</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1555004305405</updated>
+    </task>
+    <task id="LOCAL-00004" summary="new version">
+      <created>1555004648471</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1555004648472</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TodoView">
@@ -527,12 +541,12 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14699684" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49838188" visible="true" weight="0.14699684" />
+      <window_info id="Structure" order="1" sideWeight="0.50161815" side_tool="true" weight="0.14699684" />
+      <window_info id="Favorites" order="2" sideWeight="0.50161815" side_tool="true" weight="0.14699684" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32827586" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.27548808" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.27548808" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.34924078" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -592,16 +606,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="remove trash" />
     <MESSAGE value="update design + code" />
-    <option name="LAST_COMMIT_MESSAGE" value="update design + code" />
+    <MESSAGE value="new version" />
+    <option name="LAST_COMMIT_MESSAGE" value="new version" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/module/neuro_processing.py</url>
-          <line>336</line>
-          <option name="timeStamp" value="97" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/task.py</url>
           <line>78</line>
@@ -613,24 +623,9 @@
           <option name="timeStamp" value="146" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/module/neuro_processing.py</url>
-          <line>255</line>
-          <option name="timeStamp" value="158" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/neuro_serv.py</url>
-          <line>74</line>
+          <line>79</line>
           <option name="timeStamp" value="161" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/module/neuro_processing.py</url>
-          <line>175</line>
-          <option name="timeStamp" value="162" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/__init__.py</url>
-          <line>55</line>
-          <option name="timeStamp" value="165" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/__init__.py</url>
@@ -782,74 +777,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/module/get_tile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2369">
-          <caret line="115" column="28" selection-start-line="115" selection-start-column="28" selection-end-line="115" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#36#0" expanded="true" />
-            <marker date="1554754346513" expanded="true" signature="832:1124" ph="..." />
-            <marker date="1554754346513" expanded="true" signature="3103:3205" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/module/path_to_tile_indexes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="77" selection-start-line="77" selection-end-line="77" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/module/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$USER_HOME$/Miniconda3/Lib/site-packages/flask/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40687">
-          <caret line="1798" selection-start-line="1798" selection-end-line="1798" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$USER_HOME$/Miniconda3/Lib/site-packages/werkzeug/debug/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6072">
           <caret line="287" selection-start-line="287" selection-end-line="287" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Miniconda3/Lib/site-packages/werkzeug/serving.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6578">
-          <caret line="292" selection-start-line="292" selection-end-line="292" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Miniconda3/Lib/socketserver.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="14858">
-          <caret line="650" selection-start-line="650" selection-end-line="650" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Miniconda3/Lib/threading.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19711">
-          <caret line="863" selection-start-line="863" selection-end-line="863" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Miniconda3/Lib/http/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9200">
-          <caret line="417" selection-start-line="417" selection-end-line="417" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/static/js/script.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6624">
-          <caret line="290" column="21" selection-start-line="290" selection-start-column="21" selection-end-line="290" selection-end-column="21" />
         </state>
       </provider>
     </entry>
@@ -860,33 +794,94 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/Miniconda3/Lib/site-packages/flask/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="253">
+          <caret line="2308" selection-start-line="2308" selection-end-line="2308" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Miniconda3/Lib/http/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="417" selection-start-line="417" selection-end-line="417" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Miniconda3/Lib/site-packages/werkzeug/serving.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="292" selection-start-line="292" selection-end-line="292" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Miniconda3/Lib/socketserver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="650" selection-start-line="650" selection-end-line="650" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Miniconda3/Lib/threading.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="542">
+          <caret line="863" selection-start-line="863" selection-end-line="863" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/module/neuro_processing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="212">
+          <caret line="152" column="66" selection-start-line="152" selection-start-column="66" selection-end-line="152" selection-end-column="66" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <marker date="1555091675953" expanded="true" signature="7798:8572" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/module/path_to_tile_indexes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1219">
+          <caret line="55" column="11" selection-start-line="55" selection-start-column="6" selection-end-line="55" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/neuro_serv.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-197">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
+        <state relative-caret-position="866">
+          <caret line="85" column="13" selection-start-line="85" selection-start-column="8" selection-end-line="85" selection-end-column="13" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/__init__.py">
+    <entry file="file://$PROJECT_DIR$/module/get_tile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="302">
-          <caret line="73" column="25" selection-start-line="73" selection-start-column="25" selection-end-line="73" selection-end-column="25" />
+        <state relative-caret-position="272">
+          <caret line="104" column="6" selection-start-line="104" selection-start-column="6" selection-end-line="104" selection-end-column="6" />
           <folding>
-            <element signature="e#0#14#0" expanded="true" />
+            <element signature="e#0#36#0" expanded="true" />
+            <marker date="1555092379856" expanded="true" signature="832:1124" ph="..." />
+            <marker date="1555092379856" expanded="true" signature="3103:3187" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/module/neuro_processing.py">
+    <entry file="file://$PROJECT_DIR$/static/js/script.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="82">
-          <caret line="191" column="45" selection-start-line="191" selection-start-column="45" selection-end-line="191" selection-end-column="45" />
+        <state relative-caret-position="597">
+          <caret line="295" column="21" selection-start-line="295" selection-start-column="21" selection-end-line="295" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="464">
+          <caret line="79" column="36" selection-start-line="79" selection-start-column="36" selection-end-line="79" selection-end-column="36" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <marker date="1554930391688" expanded="true" signature="8181:9003" ph="..." />
+            <element signature="e#0#14#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -10,6 +10,7 @@ from keras.backend.tensorflow_backend import _to_tensor
 # from arcgis.geometry import Polygon, Point, Geometry
 # from sympy.geometry import Polygon, Point, intersection
 from shapely.geometry import Polygon, MultiPolygon
+graph = tf.get_default_graph()
 
 
 def normalize_mean_std(image_arr):
@@ -26,9 +27,6 @@ def normalize_mean(image_arr):
     return image_arr - np.mean(image_arr, axis=(0, 1))
 
 
-graph = tf.get_default_graph()
-
-
 def normalization(img):
     for i in range(3):
         min = img[:, i].min()
@@ -37,27 +35,6 @@ def normalization(img):
             img[:, i] -= min
             img[:, i] *= (255./(max-min))
     return img
-
-
-# цвет пиксела RGB -> значение яркости
-def lum(c):
-    # формула, которая обычно используется для определения яркости
-    return int(0.3*c[0] + 0.59*c[1] + 0.11*c[2])
-
-
-def r(c):
-    # цвет пиксела RGB -> значение R
-    return c[0]
-
-
-def g(c):
-    # цвет пиксела RGB -> значение G
-    return c[1]
-
-
-def b(c):
-    # цвет пиксела RGB -> значение B
-    return c[2]
 
 
 def normalization_image(src):
@@ -142,7 +119,6 @@ def bootstrapped_crossentropy(y_true, y_pred, bootstrap_type='hard', alpha=0.95)
     _epsilon = _to_tensor(K.epsilon(), prediction_tensor.dtype.base_dtype)
     prediction_tensor = K.tf.clip_by_value(prediction_tensor, _epsilon, 1 - _epsilon)
     prediction_tensor = K.tf.log(prediction_tensor / (1 - prediction_tensor))
-
     if bootstrap_type == 'soft':
         bootstrap_target_tensor = alpha * target_tensor + (1.0 - alpha) * K.tf.sigmoid(prediction_tensor)
     else:
@@ -164,8 +140,8 @@ def denoise_image(mask_arr):
 
 
 def denoise_fill_image(image):
-    """ Fill holes in image """
-    kernel = np.ones((3, 3))
+    """ Fill small holes in image """
+    kernel = np.ones((3, 3), dtype=np.uint8)
     image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel, iterations=1)
     image = cv2.dilate(image, kernel)
     # image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
@@ -174,7 +150,7 @@ def denoise_fill_image(image):
 
 def find_contours(mask_arr, start_lat, start_lng, lat_per_pixel, lng_per_pixel, main_path):
     img_t = np.transpose(mask_arr).copy()
-    _, contours, hier = cv2.findContours(img_t, mode=cv2.RETR_LIST, method=cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, hier = cv2.findContours(img_t, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
     coords_cnt = []
     main_path = main_path.simplify(lat_per_pixel)
     for cnt, h in zip(contours, hier[0]):
@@ -191,9 +167,14 @@ def find_contours(mask_arr, start_lat, start_lng, lat_per_pixel, lng_per_pixel, 
             cnt[-1] = cnt[0]
             # coords_cnt.append(cnt.tolist())
             if cnt.shape[0] > 2:
+                if h[-1] != -1:
+                    cnt = np.flip(cnt, 0)
                 cnt_poly = Polygon(list(map(tuple, cnt.tolist())))
-                cnt_poly = cnt_poly.simplify(lat_per_pixel)
+
                 cnt_poly = cnt_poly.buffer(0)
+                if not cnt_poly.is_valid:
+                    print("not valid, ", cnt_poly.type)
+                    # cnt_poly = cnt_poly.simplify(lat_per_pixel)
 
                 if cnt_poly.geom_type == 'Polygon' and cnt_poly.is_valid:
                     if not main_path.disjoint(cnt_poly):
@@ -202,16 +183,13 @@ def find_contours(mask_arr, start_lat, start_lng, lat_per_pixel, lng_per_pixel, 
                             coords_cnt.append(intersection_cnt)
 
                 elif cnt_poly.type == 'MultiPolygon' and cnt_poly.is_valid:
-                    # cnt_poly = cnt_poly.convex_hull
-                    # if not main_path.disjoint(cnt_poly):
-                    #     intersection_cnt = find_intersection(main_path, cnt_poly)
-                    #     if len(intersection_cnt) > 2:
-                    #         coords_cnt.append(intersection_cnt)
                     for sub_poly in cnt_poly:
                         if not main_path.disjoint(sub_poly):
                             intersection_cnt = find_intersection(main_path, sub_poly)
                             if len(intersection_cnt) > 2:
                                     coords_cnt.append(intersection_cnt)
+                else:
+                    print("No intersection, type is ", cnt_poly.type)
 
             # !!!!!!!Возможна ошибка - fabs
         except Exception as e:
@@ -232,7 +210,7 @@ def find_intersection(main_path, poly_path):
 
         return []
     except Exception as e:
-        print("find_intersection func", e)
+        print("Find_intersection function error", e)
         return []
 
 
@@ -244,7 +222,7 @@ def predict_class(image, class_property, model, class_name, delta):
 
     image = class_property["normalization"](image)
     for i in range(height // tile_size):
-        for j in range(width // tile_size ):
+        for j in range(width // tile_size):
             cropped_image = image[i*tile_size:i*tile_size+tile_size, j*tile_size:j*tile_size+tile_size]
             cropped_image = cropped_image[np.newaxis, :, :, :]
             pred = model.predict(cropped_image)
@@ -253,7 +231,7 @@ def predict_class(image, class_property, model, class_name, delta):
             pred = np.array(pred, dtype=np.uint8).reshape((tile_size, tile_size))
             mask[i*tile_size:i*tile_size+tile_size, j*tile_size:j*tile_size+tile_size] = pred
 
-    cv2.imwrite(f"{class_name}_pred.png", mask)
+
     return mask
 
 
@@ -263,78 +241,35 @@ def classify(image, class_list, path, lat_lng, class_prop_to_model, models):
     zoom = 18
     size = 256
     main_path = Polygon(list(map(tuple, path)))
-    # print(main_path)
-    glob_result = {}
+    center_main_path = list(main_path.centroid.coords[0])
+    # Общий реультат для конутров и результатов
+    glob_result = {"center": center_main_path}
 
-    tile_index_X = lat_lng[0]
-    tile_index_Y = lat_lng[1]
+    tile_index_x = lat_lng[0]
+    tile_index_y = lat_lng[1]
     # ИЗ ID ПЕРЕВОДИМ В КООРДИНАТЫ И ПОЛУЧАЕМ (0, 0)
-    first_lat, first_lng = num2deg(tile_index_X, tile_index_Y, zoom)
+    first_lat, first_lng = num2deg(tile_index_x, tile_index_y, zoom)
     # находим разницу для широты
-    sec_lat, _ = num2deg(tile_index_X, tile_index_Y + 1, zoom)
+    sec_lat, _ = num2deg(tile_index_x, tile_index_y + 1, zoom)
     lat_per_pixel = math.fabs(sec_lat - first_lat) / 256
     # находим разницу для долготы
-    _, sec_lng = num2deg(tile_index_X + 1, tile_index_Y, zoom)
+    _, sec_lng = num2deg(tile_index_x + 1, tile_index_y, zoom)
     lng_per_pixel = math.fabs(sec_lng - first_lng) / 256
 
     with graph.as_default():
         for class_name in class_list:
             # results_for_class = {}
-            class_mask = predict_class(image=image, class_property=class_prop_to_model[class_name],
-                          model=models[class_name], class_name, delta=delta)
             try:
+                class_mask = predict_class(image=image, class_property=class_prop_to_model[class_name],
+                                           model=models[class_name], class_name=class_name, delta=delta)
+
+                class_mask = denoise_fill_image(class_mask)
+                cv2.imwrite(f"{class_name}_pred.png", class_mask)
+
                 coords_of_contours = find_contours(class_mask, first_lat, first_lng, lat_per_pixel, lng_per_pixel, main_path)
                 glob_result.update({class_name: coords_of_contours})
                 # results_for_class.update({f'{tile_index_X}_{tile_index_Y}': coords_of_contours})
             except Exception as e:
                 print(f"Can't find contours in class: {class_name}. ", e)
-                # results_for_class.update({f'{tile_index_X}_{tile_index_Y}': []})
-            # FIND COUNTOURS
-
-            # for image in images:
-            #     if image[1] is not None:
-            #         tile_index_X = image[0][0]
-            #         tile_index_Y = image[0][1]
-            #         image_arr = image[1]
-            #
-            #         # ИЗ ID ПЕРЕВОДИМ В КООРДИНАТЫ И ПОЛУЧАЕМ (0, 0)
-            #         first_lat, first_lng = num2deg(tile_index_X, tile_index_Y, zoom)
-            #
-            #         # находим разницу для широты
-            #         sec_lat, _ = num2deg(tile_index_X, tile_index_Y + 1, zoom)
-            #         lat_per_pixel = math.fabs(sec_lat - first_lat) / 256
-            #
-            #         # находим разницу для долготы
-            #         _, sec_lng = num2deg(tile_index_X + 1, tile_index_Y, zoom)
-            #         lng_per_pixel = math.fabs(sec_lng - first_lng) / 256
-            #
-            #         # массив для всей маски
-            #         # mask = np.zeros((size, size))
-            #
-            #         try:
-            #             image_arr = class_prop_to_model[class_name]['normalization'](image_arr)
-            #             image_arr = np.reshape(image_arr, (1, size, size, 3))
-            #             res = models[class_name].predict(image_arr)
-            #             res = np.reshape(res, (size, size))
-            #             res[res >= delta] = 255
-            #             res[res < delta] = 0
-            #             res = np.transpose(res).astype(np.uint8).copy()
-            #             # cv2.imwrite(f'pred{tile_index_X}_{tile_index_Y}.png', res)
-            #         except Exception as e:
-            #             print("predict image func", e)
-            #             res = np.zeros((size, size))
-            #
-            #         if res.max() > 0:
-            #             res = np.array(res, dtype=np.uint8)
-            #             # if class_name == "cars":
-            #             #    res = denoise_fill_image(res)
-            #
-            #             coords_of_contours = find_contours(res, first_lat, first_lng, lat_per_pixel, lng_per_pixel,
-            #                                                main_path)
-            #             results_for_class.update({f'{tile_index_X}_{tile_index_Y}': coords_of_contours})
-            #
-            #     else:
-            #         results_for_class.update({f'{tile_index_X}_{tile_index_Y}': []})
-
-
         return glob_result
+

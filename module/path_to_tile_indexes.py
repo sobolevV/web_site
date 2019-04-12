@@ -53,7 +53,7 @@ def line(x0, x1, y0, y1, diff):
 
 def get_indexes(path, zoom=18):
     coords = np.array(path, dtype=np.float32).reshape(-1, 2)
-    print(coords)
+    # print(coords)
     coords.sort(axis=0)
 
     # ##################################################

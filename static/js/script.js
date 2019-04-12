@@ -157,7 +157,10 @@ function makePost(coords, classes, locationName) {
 
 function showResults(result_from_server) {
 
-
+    let locationName = result_from_server['location'];
+    let requests = result_from_server['requests'];
+    let pathsOfClasses = result_from_server["paths"];
+    
     $('#loader').css({
         display: 'none'
     });
@@ -177,48 +180,47 @@ function showResults(result_from_server) {
                 $('#map_overlay').append($(resultHtml))
             }
         })
-        // window.location.href = window.location.href + "results";
     } else {
         $("#result").css({
             display: 'block'
         });
     }
-
-
     $('#loader').css({
         display: 'none'
     });
     $('#submitBtn').removeClass('disabled');
 
 
-    drawResult(map, result_from_server);
-    userArea.setMap(null);
-    pths = userArea.getPaths();
-    new google.maps.Polygon({
-        paths: pths,
-        fillOpacity: 0,
-        strokeColor: "red",
-        strokeOpacity: 0.6,
-        map: map
-    })
-
+    drawResult(map, pathsOfClasses);
+    if (userArea){
+        userArea.setMap(null);
+            new google.maps.Polygon({
+            paths: userArea.getPaths(),
+            fillOpacity: 0,
+            strokeColor: "red",
+            strokeOpacity: 0.6,
+            map: map
+        })
+    } 
     insertRequesstList(result_from_server['requests']);
 
     // form links for share
-    var url_share = new String(window.location.href);
+    var url_share = new String(window.location.href)+"/ready:location="+locationName;
     console.log(url_share);
 
     //    share_text = ""
 
     ///////////////////////////////////////
-    //        "<div id='facebook' class='ui column'><a href='https://www.facebook.com/sharer/sharer.php?u=" + url_share + " target='_blank'><img src='static/css/icons/facebook.png'></a></div>"))
-    /////////////////////////////////////
-    //    $('#vk').html(VK.Share.button({
-    //        url: url_share
-    //    }, {
-    //        type: 'custom',
-    //        text: "<img src='static/css/icons/vk.png'>"
-    //    }))
+     
+    $('.button.facebook').parent().attr('href', 'https://www.facebook.com/sharer/sharer.php?u=' + url_share)
+    $('.button.twitter').parent().attr('href', 'http://twitter.com/share?text=LandPober web-site&url='+ url_share +'&hashtags=LandProber' )
+    $('#vk').html(VK.Share.button({
+        url: url_share
+    }, {
+        type: 'custom',
+        text: '<button class="ui circular vk icon button"> <i class="vk icon"></i></button>'
+    }))
+    // '<i class="vk icon" style="margin: 0!important; color: white "></i>'
     //    $('#google').html(google_share)
 
 
@@ -238,7 +240,8 @@ function shareGoogle() {
     return false;
 }
 
-function drawResult(map, json) {
+function drawResult(map, paths) {
+    console.log(paths);
     classProp = {
         'trees': {
             color: "#3CA0D0",
@@ -268,21 +271,23 @@ function drawResult(map, json) {
     let blockNameWithResults = "#result .segment"
     $(blockNameWithResults).empty()
 
-    let res = json['paths']
-    let jstsUserSelectedArea = request.getJstsPoly();
-
-    for (className in res) {
+    let pathsOfClasses = paths;
+    let centerOfUserArea = paths.center;
+    delete pathsOfClasses.center;
+    
+    // let jstsUserSelectedArea = request.getJstsPoly();
+    for (className in pathsOfClasses) {
         //let copyUserAreaForUnion = jstsUserSelectedArea;
         let pathClass = [];
         let countOfAreas = 0;
         let commonArea = 0;
 
-        res[className].forEach(function (contour) {
+        pathsOfClasses[className].forEach(function (contour) {
             pathClass.push(contour.map(function (val) {
-                return {
-                    "lat": val[0],
-                    "lng": val[1]
-                }
+                    return {
+                        "lat": val[0],
+                        "lng": val[1]
+                    }
             }))
         })
         if (pathClass.length) {
@@ -308,7 +313,7 @@ function drawResult(map, json) {
                 <div class="item">Всего найденных территорий: ' + countOfAreas + '</div></div>'))
 
 
-
+        map.setCenter(new google.maps.LatLng(centerOfUserArea[0], centerOfUserArea[1]));
     } //class
 }
 

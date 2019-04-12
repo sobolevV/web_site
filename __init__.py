@@ -53,27 +53,21 @@ def analyze_area():
 # check results
 @app.route('/check', methods=["GET", "POST"])
 def check():
-    print(request.form)
     location_name = request.form['location']
-    # location_name = location_name.decode('utf-8', 'ignore')
     print(location_name)
     res = tasker.check_status(location_name)
-    # если рузальтат готов, то записываем в файл
-    # if res == 'wait':
-    #     return "wait"
     if res == "fail":
         return render_template('500.html'), 500
     elif res == "wait":
         return "wait"
     else:
-        return_data = {'paths': res}
-        write_to_file(location_name, res)
-
+        # если рузальтат готов, то записываем в файл
+        return_data = {'paths': res, 'location': location_name}
+        write_to_file(location_name, return_data)
         archive.insert(0, [location_name])
         if len(archive) == 11:
             archive.pop()
-
-        return_data.update({'location': location_name, 'requests': archive})
+        return_data.update({'requests': archive})
         return jsonify(return_data)
 
 
@@ -83,7 +77,17 @@ def get_ready():
     print(location_name)
     with open(f'data/{location_name}.json') as f:
         data = json.load(f)
-    return jsonify({"paths": data})
+    data.update({'requests': archive})
+    return jsonify(data)
+
+
+@app.route('/ready:location=<location_name>', methods=["GET", "POST"])
+def get_ready_link(location_name):
+    # location_name = request.form['location']
+    print(location_name)
+    with open(f'data/{location_name}.json') as f:
+        data = json.load(f)
+    return render_template("index.html", res={"paths": data})
 
 
 # get form

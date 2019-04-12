@@ -100,10 +100,9 @@ def get_my_map(combin, zoom):
     # входные данные
     size = 256
     combin = np.array(combin).reshape((-1, 2))
-    print(combin)
     width = (np.max(combin[:, 0]) - np.min(combin[:, 0]) + 1) * size
     height = (np.max(combin[:, 1]) - np.min(combin[:, 1]) + 1) * size
-    print(height, width)
+    # print(height, width)
     image = np.zeros((height, width, 3), dtype=np.uint8)
     max_index_x = width // size
     index_y = 0

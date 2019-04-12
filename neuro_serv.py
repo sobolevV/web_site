@@ -34,9 +34,14 @@ class_list_to_model = {
             'path': "module\\models\\model_cars.h5",
             'normalization': normalize_div255,
             'tile_size': 256
-        }
-     }
+        },
 
+     }
+# 'buildings': {
+#             'path': "module\\models\\unet_buildings.h5",
+#             'normalization': normalize_mean_std,
+#             'tile_size': 256
+#         }
 models = {}
 for key in class_list_to_model.keys():
     models.update({key: load_model(class_list_to_model[key]['path'], custom_objects={
