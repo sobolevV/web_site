@@ -214,32 +214,33 @@ def find_intersection(main_path, poly_path):
         return []
 
 
-def predict_class(image, class_property, model, class_name, delta):
-    tile_size = class_property["tile_size"]
+def predict_class(image, class_property, model, class_name):
+    crop_size = class_property["input_size"]
+    output_size = class_property["output_size"]
+    delta = class_property["delta"]
     height = image.shape[0]
     width = image.shape[1]
     mask = np.zeros((height, width), dtype=np.uint8)
 
     image = class_property["normalization"](image)
-    for i in range(height // tile_size):
-        for j in range(width // tile_size):
-            cropped_image = image[i*tile_size:i*tile_size+tile_size, j*tile_size:j*tile_size+tile_size]
+    for i in range(height // crop_size):
+        for j in range(width // crop_size):
+            cropped_image = image[i*crop_size:i*crop_size+crop_size, j*crop_size:j*crop_size+crop_size]
+            cropped_image = cv2.resize(cropped_image, (output_size, output_size))
             cropped_image = cropped_image[np.newaxis, :, :, :]
             pred = model.predict(cropped_image)
             pred[pred > delta] = 255
             pred[pred <= delta] = 0
-            pred = np.array(pred, dtype=np.uint8).reshape((tile_size, tile_size))
-            mask[i*tile_size:i*tile_size+tile_size, j*tile_size:j*tile_size+tile_size] = pred
-
+            pred = np.array(pred, dtype=np.uint8).reshape((output_size, output_size))
+            pred = cv2.resize(pred, (crop_size, crop_size))
+            mask[i*crop_size:i*crop_size+crop_size, j*crop_size:j*crop_size+crop_size] = pred
 
     return mask
 
 
 def classify(image, class_list, path, lat_lng, class_prop_to_model, models):
     global graph
-    delta = 0.5
     zoom = 18
-    size = 256
     main_path = Polygon(list(map(tuple, path)))
     center_main_path = list(main_path.centroid.coords[0])
     # Общий реультат для конутров и результатов
@@ -261,7 +262,7 @@ def classify(image, class_list, path, lat_lng, class_prop_to_model, models):
             # results_for_class = {}
             try:
                 class_mask = predict_class(image=image, class_property=class_prop_to_model[class_name],
-                                           model=models[class_name], class_name=class_name, delta=delta)
+                                           model=models[class_name], class_name=class_name)
 
                 class_mask = denoise_fill_image(class_mask)
                 cv2.imwrite(f"{class_name}_pred.png", class_mask)

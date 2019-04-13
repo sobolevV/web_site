@@ -1,176 +1,20 @@
-<html lang="ru">
+{% extends "index.html" %}
 
-<head>
-    <meta charset="UTF-8">
-</head>
-
-<body style="background: #1B1C1D;">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename = 'css/icons/logo.png') }}" type="image/png" sizes="any">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.js"></script>-->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DF3BDLM7jAMtq66zRP-5WBLSySMjCo8&libraries=places,geometry"></script>
-    <script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
-    <style type="text/css">
-        @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
-    </style>
-
-    <title>LandProber</title>
+{% block shared %}
+{% if shared_data %}
+<script src="{{ url_for('static', filename = 'js/script.js') }}"></script>
+<script>
+    let archivedData = {{shared_data|tojson}};
+    // let locationName = archivedData.location;
+    $(document).ready(function() {
+        if ($("#welcome")) {
+            $("#welcome").remove()
+        }
+        showResults(archivedData);
+        history.pushState("", "", "/");
+    })
 
 
-
-    <header style="margin:0;" class="ui  inverted">
-
-        <div class="ui two column divided grid inverted menu middle aligned">
-            <div class="row" style="padding-top: 3px!important; padding-bottom: 3px!important;">
-                <!--                -->
-                <!--             <div class="divider vertical"></div>-->
-                <div class="column">
-                    <a title="Home page" href="/home"> 
-                        <div class="ui header heart center aligned">UCLAB</div>
-                    </a>
-                </div>
-
-
-
-
-                <div class="column">
-                    <div class="ui right floated menu inverted column">
-                        <div class="ui buttons purple">
-                            <button id="RU" class="ui right floated inverted button basic purple lng active lang-text">Рус</button>
-                            <button id="EN" class="ui right floated inverted button basic purple lng">Eng</button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-<!--
-            <div class="row" style="padding: 0px!important">
-                <div class="column"></div>
-                <div class="column"></div>
-                <div class="column">
-
-                    <div id="search_container" class="ui fluid popup bottom left transition animating scale menu_popup" style="display: none;">
-                        <h3 class="ui header center aligned">Внимание</h3>
-                        <h3 class="ui header center aligned">Проверьте квадрат поиска</h3>
-                        <div style=" font-family: Comfortaa; white-space: unset;text-align: center;margin-top: 0.0em !important;" class="ui center aligned basic segment">
-                            <p>
-                                Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.
-                            </p>
-                        </div>
-                        <button id="submitBtn" class="ui center aligned purple button fluid">ПОЛУЧИТЬ</button>
-                        <input id="pac-input" class="controls" type="text" placeholder="Enter yout address" autocomplete="off">
-                    </div>
-
-                    <div id="requests" class="ui fluid popup bottom center transition animating scale menu_popup inverted" style="display: none;">
-                        <h4 class="ui header aligned center">Список запросов</h4>
-                        <div class="ui two columns grid middle aligned">
-                        
-                        </div>
-                    </div>
-
-                </div>
-                <div class="column"></div>
-
-            </div>
--->
-
-
-            <!--            -->
-        </div>
-
-
-    </header>
-
-
-
-
-
-    <!--<div class="dimmed pusher">пушер</div>-->
-    <div id="right_sidebar" class="ui menu sidebar vertical right overlay huge">
-        <div id="right_loader" class="ui segment" style="height: 100%;">
-            <div class="ui active dimmer inverted">
-                <div class="ui loader large">
-                </div>
-            </div>
-            <!--                -->
-            <div id="information">
-                
-            </div>
-            <div id="links" class="item">
-                <h4 class="ui header item center aligned">Поделиться</h4>
-                <div id="links_container" class="ui three column grid container center aligned">
-                </div>
-                <div class="ui horizontal divider"></div>
-                <div class="item">
-                    <div class="ui button fluid inverted">
-                        <a target="_blank" rel="noopener noreferrer" href="http://urbanbasis.com/feedback">
-                            <i class="icon comment"></i>
-                            Оставить отзыв о сайте
-                        </a>
-                    </div>
-
-                </div>
-            </div>
-            <!--                -->
-
-        </div>
-
-
-    </div>
-    <div class="pusher">
-        <!-- pusher -> cointainer for map and other under slidebar -->
-        <div id="map" style="height: 95%; background: gray;">
-
-        </div>
-    </div>
-    
-    
-    {%if res%}
-        <script type=text/javascript>
-            $(window).on('load',function(){
-                var result = JSON.parse({{res|tojson}})
-                window.resultGlobal = result;
-                window.lang = '{{lng}}';
-                var position =  {lat: Number(result['lat']), lng: Number(result['lon'])};
-                window.map = new google.maps.Map(document.getElementById('map'), {zoom: 18, center: position});
-                window.map.setMapTypeId('hybrid');
-                $(".ui.sidebar.right").sidebar({'context': '#map'}); 
-                //$('.container').css({display: 'none'});
-                google.maps.event.addListenerOnce(window.map,"projection_changed", function() {
-                    drawResult(window.map, result)
-                    var boundsOfArea = getBoundsOfArea(new google.maps.LatLng(Number(result['lat']), Number(result['lon'])), window.map)
-                    var path = [new google.maps.LatLng(boundsOfArea.j.j, boundsOfArea.l.j), new google.maps.LatLng(boundsOfArea.j.l, boundsOfArea.l.l)]
-                    var dist = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
-                    window.Area = dist * dist;
-                    changeLanguage('{{lng}}');
-                    insertInfo(window.resultGlobal, window.Area, window.lang);
-                    $('#right_sidebar').addClass('visible');
-                    $('#links .divider ').remove()
-                    $('#links .item:nth-child(1)').remove()
-                    $('#right_loader .dimmer').dimmer('show');
-                    $('#right_loader .dimmer').dimmer('hide');
-                    $('#links_container').remove();
-                //$('#info_list').css({height: '90%'})
-                //$('#mapResultWrapper').css({'margin-top': '1%'});
-                //$('#info_list').css({'overflow-y': 'hidden', 'height': '100%'})
-                });
-
-            });
-        </script>
-    {%endif%}
-    
-
-    <script src="https://apis.google.com/js/platform.js" async="" defer="" gapi_processed="true"></script>
-    <script>
-        //$('.ui.sidebar.bottom').sidebar({context: '#'})menuContainer
-    </script>
-
-</body>
-<script src="https://apis.google.com/js/platform.js" async defer></script>
-<script async src="{{ url_for('static', filename = 'js/script.js') }}"></script>
-
-</html>
+</script>
+{% endif %}
+{% endblock %}

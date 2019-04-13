@@ -81,13 +81,14 @@ def get_ready():
     return jsonify(data)
 
 
-@app.route('/ready:location=<location_name>', methods=["GET", "POST"])
+@app.route('/ready/location=<string:location_name>', methods=["GET", "POST"])
 def get_ready_link(location_name):
     # location_name = request.form['location']
-    print(location_name)
+    print('shared', location_name)
     with open(f'data/{location_name}.json') as f:
         data = json.load(f)
-    return render_template("index.html", res={"paths": data})
+    data.update({'location': location_name.encode('utf-8'), 'requests': archive})
+    return render_template("share.html", shared_data=data)
 
 
 # get form

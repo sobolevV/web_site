@@ -52,7 +52,6 @@ $('document').ready(function (result) {
     }, 20000);
 
 
-    info = new information();
     request = new userRequest();
 });
 
@@ -68,14 +67,18 @@ function initializeInputAddress(id, parentId) {
 
 
 
-
 function get_requests() {
     $.post('/archive', function (result) {
         insertRequesstList(result)
     })
 }
+//
+//$.getJSON( "/ready", function( data ) {
+//  var items = [];
+//  console.log(data)
+//});
 
-//////////////////////ОБНОВИТЬ!
+
 function check_results(locationName) {
     $.ajax({
         type: "POST",
@@ -205,7 +208,7 @@ function showResults(result_from_server) {
     insertRequesstList(result_from_server['requests']);
 
     // form links for share
-    var url_share = new String(window.location.href)+"/ready:location="+locationName;
+    var url_share = new String(window.location.origin)+"/ready/location="+locationName;
     console.log(url_share);
 
     //    share_text = ""
@@ -220,10 +223,6 @@ function showResults(result_from_server) {
         type: 'custom',
         text: '<button class="ui circular vk icon button"> <i class="vk icon"></i></button>'
     }))
-    // '<i class="vk icon" style="margin: 0!important; color: white "></i>'
-    //    $('#google').html(google_share)
-
-
 }
 
 function showErrorMessage(error) {
@@ -234,11 +233,7 @@ function showErrorMessage(error) {
     })
 }
 
-// form link for google
-function shareGoogle() {
-    javascript: window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
-    return false;
-}
+
 
 function drawResult(map, paths) {
     console.log(paths);
@@ -261,11 +256,11 @@ function drawResult(map, paths) {
             header: "Гаражи",
             icon: "cube",
         },
-        'water': {
-            color: "#B90091",
-            css_color: "water_color",
-            header: "Вода",
-            icon: "tint"
+        'buildings': {
+            color: "purple",
+            css_color: "purple",
+            header: "Здания",
+            icon: "building"
         }
     }
     let blockNameWithResults = "#result .segment"
@@ -304,13 +299,15 @@ function drawResult(map, paths) {
             classPaths.getPaths().getArray().forEach(function (path) {
                 commonArea += google.maps.geometry.spherical.computeArea(path)
             })
-            countOfAreas = classPaths.getPaths().getArray().length
-        }
-
-        $(blockNameWithResults).append(
+            countOfAreas = classPaths.getPaths().getArray().length;
+            
+            $(blockNameWithResults).append(
             $('<div class="ui '+classProp[className].css_color+' ribbon label"><i class="' + classProp[className].icon + ' icon"></i>' + classProp[className].header + '</div>')).append($('<div class="ui list"><div class="item">\
                 Общая площадь найденных объектов: ' + commonArea.toFixed(2) + ' m<sup><small>2</small></sup></div>\
                 <div class="item">Всего найденных территорий: ' + countOfAreas + '</div></div>'))
+        }
+
+        
 
 
         map.setCenter(new google.maps.LatLng(centerOfUserArea[0], centerOfUserArea[1]));
@@ -445,65 +442,41 @@ function insertInfo(info, lang) {
 
 function insertRequesstList(list) {
     $('#requests .row').remove();
-    var text;
-    if (window.lang == "RU") {
-        text = 'Последние запросы'
-    } else {
-        text = 'Last requests'
-    }
-    //$('#requests').append('<h4 class="ui header item aligned center"></h4>')
     $('#archive').empty()
-    for (el in list) {
+    if (list.length > 0){
+        for (el in list) {
 
-        $('#archive').append($(
-            '<div class="ui basic button row" value=" ' + list[el][0] + ' "> ' +
-            '<div class="column">' + list[el][0] + '</div> </div>'))
+            $('#archive').append($(
+                '<div class="ui basic button row" value=" ' + list[el][0] + ' "> ' +
+                '<div class="column">' + list[el][0] + '</div> </div>'))
+        }
+        $('#archive .button').click(function () {
+            var request_val = this.getAttribute('value').slice(1, -1);
+            console.log(request_val)
+            $.post({
+                url: '/ready',
+                data: {
+                    'location': request_val
+                }
+            }).done(function (result) {
+                showResults(result)
+            }).fail()
+        })
     }
-
-    //archive of requests - click
-    $('#archive .button').click(function () {
-        var request_val = this.getAttribute('value').slice(1, -1);
-        console.log(request_val)
-        $.post({
-            url: '/ready',
-            data: {
-                'location': request_val
-            }
-        }).done(function (result) {
-            showResults(result)
-        }).fail()
-    })
+    else{
+        $('#archive').append($("<div class='column'>Cписок запросов пуст</div>"))
+    }
 }
 
 
-//изобразить квадрат на карте
-function addRectangle(map, bounds, color) {
-    var rectangle = new google.maps.Rectangle({
-        strokeColor: color,
-        strokeOpacity: 0.0,
-        strokeWeight: 0.1,
-        fillColor: color,
-        fillOpacity: 0.4,
-        map: map,
-        bounds: bounds
-    });
-}
 
-function fromLatLngToPoint(latLng, map) {
-    var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
-    var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
-    var scale = Math.pow(2, zoom);
-    var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
-    return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
-}
-
-function getPixelCoordinates(latLng, zoom) {
-    var scale = 1 << zoom;
-    var worldCoordinate = project(latLng);
-    var pixelCoordinate = new google.maps.Point(
-        Math.floor(worldCoordinate.x * scale),
-        Math.floor(worldCoordinate.y * scale));
-}
+//function getPixelCoordinates(latLng, zoom) {
+//    var scale = 1 << zoom;
+//    var worldCoordinate = project(latLng);
+//    var pixelCoordinate = new google.maps.Point(
+//        Math.floor(worldCoordinate.x * scale),
+//        Math.floor(worldCoordinate.y * scale));
+//}
 
 function project(latLng) {
     var TILE_SIZE = 256;
@@ -519,30 +492,7 @@ function project(latLng) {
         y);
 }
 
-function getBoundsOfArea(center, map) {
-    var imgSize = 512
-    var scale = Math.pow(2, zoom);
 
-    var proj = map.getProjection();
-    var wc = proj.fromLatLngToPoint(center);
-    var bounds = new google.maps.LatLngBounds();
-    var sw = new google.maps.Point(((wc.x * scale) - imgSize) / scale, ((wc.y * scale) - imgSize) / scale);
-    var point1 = new google.maps.Point(sw);
-    bounds.extend(proj.fromPointToLatLng(sw));
-    var ne = new google.maps.Point(((wc.x * scale) + imgSize) / scale, ((wc.y * scale) + imgSize) / scale);
-    var point2 = new google.maps.Point(ne);
-    bounds.extend(proj.fromPointToLatLng(ne));
-
-    return bounds
-}
-
-function inrange(min, number, max) {
-    if (!isNaN(number) && (number >= min) && (number <= max)) {
-        return true;
-    } else {
-        return false;
-    };
-}
 
 function initMap(latitude, longitude, zoom) {
     var location = {
@@ -597,10 +547,6 @@ function setGeoCoder(map, id, main) {
             lat = results[0].geometry.location.lat();
             lng = results[0].geometry.location.lng();
 
-            //            addSearchRectangle(lat, lng, true)
-            //            window.globalLat = lat;
-            //            window.globalLon = lng;
-
         });
     });
 }
@@ -623,50 +569,6 @@ function backGeoCode(lat, lng) {
 }
 
 
-function addSearchRectangle(lat, lng, draw) {
-    var scale = 1 << zoom;
-    var tileSize = 256;
-    var worldCoordinate = project(new google.maps.LatLng(lat, lng));
-    // set lat lng to center of tile
-    var tileCoordinate = new google.maps.Point(
-        Math.floor(worldCoordinate.x * scale / tileSize),
-        Math.floor(worldCoordinate.y * scale / tileSize)
-    );
-
-    var leftTopX = tileCoordinate.x - 1;
-    var leftTopY = tileCoordinate.y - 1;
-
-    var rightBotX = tileCoordinate.x + 2;
-    var rightBotY = tileCoordinate.y + 2;
-
-    var latLngLT = num2deg(leftTopX, leftTopY, zoom);
-    var latLngRB = num2deg(rightBotX, rightBotY, zoom);
-
-    // Находим площадь квадрата
-    var path = [new google.maps.LatLng(latLngLT[0], latLngLT[1]),
-                  new google.maps.LatLng(latLngRB[0], latLngRB[1]),
-        ]
-    squareLen = Number(google.maps.geometry.spherical.computeDistanceBetween(path[0], path[1]))
-    info.setSquareArea(squareLen * squareLen);
-    // bounds: boundsOfArea,
-    var opts = {
-        bounds: {
-            north: latLngLT[0],
-            south: latLngRB[0],
-            east: latLngRB[1],
-            west: latLngLT[1]
-        },
-        strokeOpacity: 0.6,
-        fillColor: '#A8E4A0',
-        fillOpacity: 0.1,
-        strokeColor: '#A8E4A0',
-        map: window.map,
-        editable: false
-    }
-    if (draw) {
-        window.rectangle = new google.maps.Rectangle(opts);
-    }
-}
 
 function num2deg(xtile, ytile, zoom) {
     var n = Math.pow(2.0, zoom)
@@ -676,110 +578,54 @@ function num2deg(xtile, ytile, zoom) {
     return [lat_deg, lon_deg]
 }
 
-function changeLanguage(lang) {
-    //$('#search_container').empty();
-    //$('#in').empty();
-    //$('#language').empty();
 
-    if (lang == "RU") {
-        $('#requests h4').text("Список запросов");
-        $('#search_container h3:nth-child(1)').text('Внимание');
-        $('#search_container h3:nth-child(2)').text('Проверьте квадрат поиска');
-        $('#search_container div p').text('Нажмите кнопку "Получить", если зеленая область соответствует Вашему запросу, иначе повторите запрос адреса.');
-        //                        '<h4>Шаг3. Нажмите "Получить"</h4>'+
-        //                        "<p>Нажмите на кнопку, если Вы выполнили все шаги.</p>"));
-
-        //        $("#header > h1").after($('<h2 style="font-size: 1.8em;">Зонд космической оценки землепользования<br>(озелененность территории)</h2>'))
-        //        $('#topInstruction').append($('<div style="    display: flex; justify-content: center;">'+
-        //                '<h3>Космический аппарат готов к работе</h3><div class="indicator"></div></div>'+
-        //                '<p>Для начала работы со спутником, укажите квадрат поиска - введите адрес</p>'))
-        $('#submitBtn').text('ПОЛУЧИТЬ')
-        $('#checkBtn').text('ПОКАЗАТЬ');
-        $('#ptr').text('Санкт-Петербург');
-        $('#request_menu').text('Новый запрос');
-        $('#request_list').text('Архив запросов');
-        //
-        //$('#slideBtn').text('Скрыть');
-        $('#links .header').text('Поделиться')
-        $('#links .item .button a').text('Оставить комментарий о сайте')
-    } else {
-        $('#requests h4').text("Requests list");
-        $('#search_container h3:nth-child(1)').text('Attention');
-        $('#search_container h3:nth-child(2)').text('Check the classification area');
-        $('#search_container > div > p').text('Click the "Get" button if the green area matches your request, otherwise repeat the address request.');
-        //        $('#steps').append($("<h4>Step 2. Check the classification area</h4>"+
-        //                        "<p>If the green area matches your query, go to the next step.</p>"+
-        //                        '<h4>Step3. Click "GET"</h4>'+
-        //                        "<p>Click on the button if you have completed all the steps.</p>"));
-
-        //        $("#header > h1").after($('<h2 style="font-size: 1.8em;">Probe for space survey of land use<br>(green spaces)</h2>'))
-        //        $('#topInstruction').append($('<div style="    display: flex; justify-content: center;">'+
-        //                '<h3>The spacecraft is ready for work</h3><div class="indicator"></div></div>'+
-        //                '<p>To get started with the satellite, specify the search box - enter the address</p>'))
-        $('#submitBtn').text('GET');
-        $('#checkBtn').text('SHOW');
-        $('#ptr').text('St. Petersburg');
-        $('#request_menu').text('New request');
-        $('#request_list').text('Archive of requests');
-        //request_list
-        //$('#slideBtn').text('Hide');
-        $('#links .header').text('Share')
-        $('#links .item .button a').text('Stay comment about site')
-
-    }
-
-    if (resultGlobal != "") {
-        insertInfo(info, window.lang);
-    }
-}
-
-function mapResizeEvent() {
-    $('#show_hide_btn').css({
-        display: 'block',
-        transition: '0.5s'
-    })
-    $('#show_hide_btn').css({
-        'margin-right': $('#right_sidebar').width()
-    });
-    $(window).resize(function () {
-        if ($('#right_sidebar').hasClass('visible')) {
-            $('#show_hide_btn').css({
-                'margin-right': $('#right_sidebar').width()
-            });
-            $('.gm-style').css({
-                width: 100 - ($('#right_sidebar').width() / $('#map').width() * 100) + '%'
-            })
-        }
-    })
-
-    $('#show_hide_btn').click(function () {
-        if ($('#right_sidebar').hasClass('visible')) {
-            $('.gm-style').css({
-                width: '100%'
-            });
-
-            $('#right_sidebar').removeClass('visible');
-
-            $('#show_hide_btn').css({
-                'margin-right': 0
-            });
-            $('#show_hide_btn  i').removeClass('right');
-            $('#show_hide_btn  i').addClass('left');
-        } else {
-            $('.gm-style').css({
-                width: 100 - Math.round(($('#right_sidebar').width() / $('#map').width()) * 100) + '%'
-            });
-            $('#right_sidebar').addClass('visible');
-
-            $('#show_hide_btn').css({
-                'margin-right': $('#right_sidebar').width()
-            });
-            $('#show_hide_btn  i').removeClass('left');
-            $('#show_hide_btn  i').addClass('right');
-        }
-    })
-
-}
+//function mapResizeEvent() {
+//    $('#show_hide_btn').css({
+//        display: 'block',
+//        transition: '0.5s'
+//    })
+//    $('#show_hide_btn').css({
+//        'margin-right': $('#right_sidebar').width()
+//    });
+//    $(window).resize(function () {
+//        if ($('#right_sidebar').hasClass('visible')) {
+//            $('#show_hide_btn').css({
+//                'margin-right': $('#right_sidebar').width()
+//            });
+//            $('.gm-style').css({
+//                width: 100 - ($('#right_sidebar').width() / $('#map').width() * 100) + '%'
+//            })
+//        }
+//    })
+//
+//    $('#show_hide_btn').click(function () {
+//        if ($('#right_sidebar').hasClass('visible')) {
+//            $('.gm-style').css({
+//                width: '100%'
+//            });
+//
+//            $('#right_sidebar').removeClass('visible');
+//
+//            $('#show_hide_btn').css({
+//                'margin-right': 0
+//            });
+//            $('#show_hide_btn  i').removeClass('right');
+//            $('#show_hide_btn  i').addClass('left');
+//        } else {
+//            $('.gm-style').css({
+//                width: 100 - Math.round(($('#right_sidebar').width() / $('#map').width()) * 100) + '%'
+//            });
+//            $('#right_sidebar').addClass('visible');
+//
+//            $('#show_hide_btn').css({
+//                'margin-right': $('#right_sidebar').width()
+//            });
+//            $('#show_hide_btn  i').removeClass('left');
+//            $('#show_hide_btn  i').addClass('right');
+//        }
+//    })
+//
+//}
 
 
 class information {

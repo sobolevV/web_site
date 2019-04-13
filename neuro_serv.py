@@ -23,25 +23,33 @@ class_list_to_model = {
         'trees': {
             'path': 'module\\models\\model_trees.h5',
             'normalization': normalize_mean_std,
-            'tile_size': 256,
+            'delta': 0.8,
+            'input_size': 256,
+            'output_size': 256
         },
         'garage': {
             'path': 'module\\models\\model_garage.h5',
             'normalization': normalize_mean_std,
-            'tile_size': 256
+            'delta': 0.7,
+            'input_size': 256,
+            'output_size': 256
         },
         'cars': {
             'path': "module\\models\\model_cars.h5",
             'normalization': normalize_div255,
-            'tile_size': 256
+            'delta': 0.7,
+            'input_size': 256,
+            'output_size': 256
         },
-
+        'buildings': {
+                    'path': "module\\models\\model_buildings.h5",
+                    'normalization': normalize_mean_std,
+                    'delta': 0.7,
+                    'input_size': 512,
+                    'output_size': 384
+        }
      }
-# 'buildings': {
-#             'path': "module\\models\\unet_buildings.h5",
-#             'normalization': normalize_mean_std,
-#             'tile_size': 256
-#         }
+
 models = {}
 for key in class_list_to_model.keys():
     models.update({key: load_model(class_list_to_model[key]['path'], custom_objects={
