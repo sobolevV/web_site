@@ -1,0 +1,6 @@
+data/*
+module/**/*.h5
+module/**/*.zip
+module/**/*.7z
+**/__pycache__
+**.txt

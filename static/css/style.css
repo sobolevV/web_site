@@ -78,7 +78,7 @@ body, html{
     position: absolute;
     right: 0;
     bottom: 15px;
-    z-index: 1;
+    z-index: 5;
     margin: 10px;
     color: white;
 }
@@ -290,6 +290,54 @@ a{
         -webkit-transform: rotate(360deg);
         -ms-transform: rotate(360deg);
         transform: rotate(360deg);
+    }
+}
+
+/* ВЕРХНЕЕ МЕНЮ */
+#header_menu{
+    border-bottom: none;
+    #margin: 11px auto 0px;
+    max-height: 40px;
+    transition: 0.5s;
+}
+/* ПРАВОЕ МЕНЮ */
+#map_overlay{
+    position: absolute;
+    max-width: 27rem;
+    max-height: 90%;
+    overflow-y: scroll;
+    z-index: 1;
+    margin: auto;
+    margin-left: 69%;
+    top: 10px;
+    right: 10px;
+    font-weight: bold;
+    transition: 0.5s;
+}
+/* ВСПЛЫВАЮЩЕ ОКНА ПО ЦЕНТРУ */
+#user_menu{
+    position: absolute;
+    top: 15%;
+    z-index: 1;
+    width: 100%;
+}
+@media (min-width: 1501px){
+    #header_menu{
+        margin: 11px auto 0px;
+    }
+}
+@media (max-width: 1500px){
+    #header_menu{
+        max-width: 50rem;
+        margin: 55px auto 0px;
+    }
+}
+
+@media (max-width:500px){
+    #map_overlay{
+        top: 60px;
+        max-height: 72%;
+        transition: 0.5s;
     }
 }
 

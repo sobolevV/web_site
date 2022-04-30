@@ -1,5 +1,5 @@
 var TILE_SIZE = 256;
-var maxUserArea = 200000;
+var maxUserArea = 300000;
 var userArea;
 
 function clearLines(lines) {
@@ -47,22 +47,23 @@ function setDrawingTools(map) {
         zIndex: 1
     };
     // drawing tool
-    //drawingMode: google.maps.drawing.OverlayType.MARKER,
-    var drawingManager = new google.maps.drawing.DrawingManager({
-        drawingControl: true,
-        drawingControlOptions: {
-            position: google.maps.ControlPosition.LEFT_TOP,
-            drawingModes: ['circle', 'polygon', 'rectangle']
-        },
-        rectangleOptions: drawingOptions,
-        circleOptions: drawingOptions,
-        polylineOptions: drawingOptions,
-        polygonOptions: drawingOptions
-
-    });
-    // init drawing
-    // drawingManager.setMap(map);
-    console.log(drawingManager, $(drawingManager));
+    // drawingMode: google.maps.drawing.OverlayType.MARKER,
+        var drawingManager = new google.maps.drawing.DrawingManager({
+            drawingControl: false, // отключить инструменты
+            drawingControlOptions: {
+                position: google.maps.ControlPosition.LEFT_TOP,
+                drawingModes: ['circle', 'polygon', 'rectangle']
+            },
+            rectangleOptions: drawingOptions,
+            circleOptions: drawingOptions,
+            polylineOptions: drawingOptions,
+            polygonOptions: drawingOptions
+    
+        });
+    //init drawing
+    drawingManager.setMap(map);
+    // console.log(drawingManager, $(drawingManager));
+    
     // init events for new drawn areas
     google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
         
@@ -96,10 +97,11 @@ function setDrawingTools(map) {
 
     $('#select_tool').click(function (e) {
 
-        if ($(this).hasClass('green')) {
-
+        if ($(this).hasClass('purple')) {
+            
+            map.setOptions({draggableCursor:'crosshair'});
             selectButtons('show', map);
-            $(this).toggleClass('green olive');
+            $(this).toggleClass('purple blue');
             $(this).text('Выключить инструмент');
 
             // удаляем иконки с карты
@@ -170,7 +172,7 @@ function setDrawingTools(map) {
                                 strokeColor: 'yellow',
                                 strokeOpacity: 0.8,
                                 strokeWeight: 2,
-                                fillColor: '#yellow',
+                                fillColor: "green",
                                 fillOpacity: 0.25,
                                 draggable: false,
                                 geodesic: true,
@@ -178,14 +180,21 @@ function setDrawingTools(map) {
                             
                             request.setArea(userArea);
                             // request.getLocation
-                            console.log(window.request.getArea())
+                            // console.log(window.request.getArea());
                             // polygons.push(userArea);
-                            if (google.maps.geometry.spherical.computeArea(polyPath) > maxUserArea) {
-                                console.log('big area');
+                            var drawnArea = google.maps.geometry.spherical.computeArea(polyPath);
+                            if (drawnArea > maxUserArea) {
                                 userArea.strokeColor = "red";
                                 userArea.fillColor = "red";
+                                $("#user_popup_inform .header").text("Слишком большая площадь выделенного участка!");
+                                $("#user_popup_inform li").eq(0).text("Ваша площадь: " + Math.round(drawnArea));
+                                $("#user_popup_inform li").eq(1).text("Максимальная допустимая: " + maxUserArea);
+                                $("#user_popup_inform").transition('browse right');
                             } else {
                                 userArea.fillColor = "green";
+                                if (!$("#user_popup_inform").hasClass("hidden")){
+                                    $("#user_popup_inform").transition();
+                                } 
                             }
 
                             google.maps.event.addListener(userArea, 'rightclick', function () {
@@ -204,8 +213,9 @@ function setDrawingTools(map) {
         } // if hasClass
         else {
             selectButtons('hide', map);
-            $(this).toggleClass('green olive');
+            $(this).toggleClass('purple blue');
             $(this).text('Выделить область');
+            map.setOptions({draggableCursor: ''});
         }
     }) // enable draw
 
@@ -228,6 +238,9 @@ function setDrawingTools(map) {
 
     $('#rm_select').click(function () {
         if (userArea) {
+            if (!$("#user_popup_inform").hasClass("hidden")){
+                $("#user_popup_inform").transition();
+            } 
             userArea.setMap(null);
             polygons = [];
         }

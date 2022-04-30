@@ -1,0 +1,17 @@
+
+<div class="ui segment" style="width: 50%;margin: auto;">
+    <form id="login_form" class="ui form" method="post" action="/login">
+        {{ log_form.hidden_tag() }}
+        <div class="field">
+            <label>Почта</label>
+            {{ log_form.mail }}
+<!--            <input type="email" name="mail" placeholder="">-->
+        </div>
+        <div class="field">
+            <label>Пароль</label>
+            {{ log_form.password }}
+<!--            <input type="password" name="password" placeholder="Password">-->
+        </div>       
+    </form>
+        <button id="login_post" class="ui purple button">Войти</button>
+</div>

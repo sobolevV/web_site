@@ -38,7 +38,7 @@ class TaskSystem:
                         print(f'make request for {self.id}')
                         # res =  post('http://79.170.167.30:61102/', data=self.list[self.id][0])
                         try:
-                            res = post('http://127.0.0.1:5055/', json=self.list[self.id][0]).json()
+                            res = post('http://127.0.0.1:5055/analyze', json=self.list[self.id][0]).json()
                             # res = res.text
                             self.list[self.id][1] = 'done'
                             print('RESULT: ', res)

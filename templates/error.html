@@ -17,27 +17,24 @@
                 <h3>LandProber</h3>
             </div>
         </div>
-        {% block content %}
-              
-        
-        {% endblock %}
         <div class="row">
             <div class="column">
-                <div class="row">
-
-                    Попробуйте позже или вернитесь на главную страницу сайта.</div>
-
-
+                {% block message %}
+                {% endblock %}
             </div>
         </div>
+<!--
+        <div class="row">
+            <div class="column">
+                    Попробуйте позже или вернитесь на главную страницу сайта.
+            </div>
+        </div>
+-->
         <div class="row">
             <a href="/">
                 <div class="ui purple button">Вернуться</div>
             </a>
         </div>
-       {%block icon%}
-        
-        {% endblock %}
     </div>
 
 

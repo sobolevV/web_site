@@ -1,0 +1,59 @@
+<div id="profile_content" class="transition visible" style="display: block !important;">
+
+    <div id="profile_content" class="transition visible" style="display: block !important;z-index: 2;">
+
+        <div class="ui purple segment" style="margin: auto;">
+            <div class="ui divided grid">
+                <div class="row">
+                    <div class="six wide column">
+                        <div class="">
+                            <img src="static/css/icons/user-image.png" class="ui medium circular image" style="
+                                width: auto;
+                                height: fit-content;
+                                margin: auto;">
+                        </div>
+                    </div>
+
+                    <div class="ten wide column">
+                        <h3 class="ui centered header">Данные профиля</h3>
+                        <div class="ui vertical fluid menu">
+                            <div class="ui item">
+                                Почта: {{ user_data.mail }}
+                            </div>
+                            <div class="ui item">
+                                {# Имя: {{ user_data.name }} #}
+                            </div>
+                            <div class="ui item">
+                                <div id="theme" class="ui toggle checkbox">
+
+                                    <input type="checkbox" name="public">
+                                    <label class="">Темная тема</label>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="ui divider"></div>
+                <div class="centered row">
+                    <h3 class="ui header">Предыдущие запросы</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $("#theme").click(function() {
+        $(".ui").toggleClass("inverted");
+        if ($(".ui .inverted").length) {
+            $("#theme label").attr('style', 'color: white !important')
+        } else {
+            $("#theme label").attr('style', 'color: black !important')
+        }
+    })
+
+</script>

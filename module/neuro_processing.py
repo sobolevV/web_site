@@ -1,16 +1,20 @@
-import numpy as np
+# import numpy as np
 import cv2
 import keras.backend
-import tensorflow as tf
-import keras.backend as K
+# import tensorflow as tf
+# import keras.backend as K
 from module.get_tile import *
 from PIL import Image
 from keras.backend.tensorflow_backend import _to_tensor
-# from pysal.lib.cg import get_polygon_point_intersect, Point, Polygon, get_shared_segments
-# from arcgis.geometry import Polygon, Point, Geometry
-# from sympy.geometry import Polygon, Point, intersection
+from .metrics import *
 from shapely.geometry import Polygon, MultiPolygon
+from simplification.util import simplify_coords, simplify_coords_vw
 graph = tf.get_default_graph()
+
+
+def normalize_127_1(image_arr):
+    image_arr = np.array(image_arr)
+    return image_arr / 127.5 - 1
 
 
 def normalize_mean_std(image_arr):
@@ -27,23 +31,9 @@ def normalize_mean(image_arr):
     return image_arr - np.mean(image_arr, axis=(0, 1))
 
 
-def normalization(img):
-    for i in range(3):
-        min = img[:, i].min()
-        max = img[:, i].max()
-        if min != max:
-            img[:, i] -= min
-            img[:, i] *= (255./(max-min))
-    return img
-
-
-def normalization_image(src):
+def normalization_hist(src):
     # Усиление границ изображения
     img_np = np.asarray(src)
-
-    # nparr = np.fromstring(src, np.uint8)
-    # nparr = nparr.reshape((255, 255))
-    # img_np = cv2.imdecode(nparr, cv2.COLOR_RGB2BGR)
 
     kernel3 = np.array([[-0.1, -0.1, -0.1], [-0.1, 2, -0.1], [-0.1, -0.1, -0.1]])
 
@@ -101,41 +91,11 @@ def getPixelCoordinates(lat, lng, zoom):
 
 
 
-def dice_coef(y_true, y_pred, smooth=1.0):
-    y_true_f = K.batch_flatten(y_true)
-    y_pred_f = K.batch_flatten(y_pred)
-    intersection = 2. * K.sum(y_true_f * y_pred_f, axis=1, keepdims=True) + smooth
-    union = K.sum(y_true_f, axis=1, keepdims=True) + K.sum(y_pred_f, axis=1, keepdims=True) + smooth
-    return K.mean(intersection / union)
-
-
-def dice_coef_loss(y_true, y_pred):
-    return 1 - dice_coef(y_true, y_pred)
-
-
-def bootstrapped_crossentropy(y_true, y_pred, bootstrap_type='hard', alpha=0.95):
-    target_tensor = y_true
-    prediction_tensor = y_pred
-    _epsilon = _to_tensor(K.epsilon(), prediction_tensor.dtype.base_dtype)
-    prediction_tensor = K.tf.clip_by_value(prediction_tensor, _epsilon, 1 - _epsilon)
-    prediction_tensor = K.tf.log(prediction_tensor / (1 - prediction_tensor))
-    if bootstrap_type == 'soft':
-        bootstrap_target_tensor = alpha * target_tensor + (1.0 - alpha) * K.tf.sigmoid(prediction_tensor)
-    else:
-        bootstrap_target_tensor = alpha * target_tensor + (1.0 - alpha) * K.tf.cast(
-            K.tf.sigmoid(prediction_tensor) > 0.5, K.tf.float32)
-    return K.mean(K.tf.nn.sigmoid_cross_entropy_with_logits(labels=bootstrap_target_tensor, logits=prediction_tensor))
-
-
-def dice_coef_loss_bce(y_true, y_pred, dice=0.5, bce=0.5, bootstrapping='hard', alpha=1.):
-    return bootstrapped_crossentropy(y_true, y_pred, bootstrapping, alpha) * bce + dice_coef_loss(y_true, y_pred) * dice
-
-
 def denoise_image(mask_arr):
     kernel = np.ones((3, 3), np.uint8)
     mask = cv2.fastNlMeansDenoising(mask_arr.astype(np.uint8), None, 5, 21, 7)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    mask = cv2.dilate(mask, kernel, iterations=1)
+    # mask = cv2.dilate(mask, kernel, iterations=1)
     return mask
 
 
@@ -148,103 +108,152 @@ def denoise_fill_image(image):
     return image
 
 
-def find_contours(mask_arr, start_lat, start_lng, lat_per_pixel, lng_per_pixel, main_path):
-    img_t = np.transpose(mask_arr).copy()
-    _, contours, hier = cv2.findContours(img_t, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
-    coords_cnt = []
-    main_path = main_path.simplify(lat_per_pixel)
-    for cnt, h in zip(contours, hier[0]):
-        try:
-            cnt = np.array(np.reshape(cnt, (-1, 2)), dtype=float)
-            cnt[:, 0] *= -lat_per_pixel
-            cnt[:, 0] += start_lat
+def create_image_from_coordinates(coords, zoom=18, tile_size=256):
+    # перевод коор-т в пиксели на глобальной карте
+    coords = list(map(lambda lat_lng: getPixelCoordinates(lat_lng[0], lat_lng[1], zoom), coords))
+    coords = np.array(coords).reshape((-1, 2))
+    # Находим мин макс значения пикселей переведенных из координат
+    coords_min_x = np.min(coords[:, 0])
+    coords_max_x = np.max(coords[:, 0])
 
-            cnt[:, 1] *= lng_per_pixel
-            cnt[:, 1] += start_lng
+    coords_min_y = np.min(coords[:, 1])
+    coords_max_y = np.max(coords[:, 1])
+    # находим размер результиррующего изображения
+    x_shape = (coords_max_x // 256 - coords_min_x // 256) * tile_size
+    y_shape = (coords_max_y // 256 - coords_min_y // 256) * tile_size
+    # центрируем - добавляем 256 пикс к X, Y т.к. картинка с маской имеет такой отступ
+    x_shape, y_shape = x_shape + (tile_size * 3), y_shape + (tile_size * 3)
 
-            # cnt = np.unique(cnt, axis=0)
-            np.resize(cnt, (cnt.shape[0] + 1, cnt.shape[1]))
-            cnt[-1] = cnt[0]
-            # coords_cnt.append(cnt.tolist())
-            if cnt.shape[0] > 2:
-                if h[-1] != -1:
-                    cnt = np.flip(cnt, 0)
-                cnt_poly = Polygon(list(map(tuple, cnt.tolist())))
+    pix_x = coords[:, 0] - (coords_min_x - coords_min_x % 256) + 256
+    pix_y = coords[:, 1] - (coords_min_y - coords_min_y % 256) + 256
+    # пустая маска
+    user_mask = np.zeros((y_shape, x_shape), dtype=np.uint8)
 
-                cnt_poly = cnt_poly.buffer(0)
-                if not cnt_poly.is_valid:
-                    print("not valid, ", cnt_poly.type)
-                    # cnt_poly = cnt_poly.simplify(lat_per_pixel)
-
-                if cnt_poly.geom_type == 'Polygon' and cnt_poly.is_valid:
-                    if not main_path.disjoint(cnt_poly):
-                        intersection_cnt = find_intersection(main_path, cnt_poly)
-                        if len(intersection_cnt) > 2:
-                            coords_cnt.append(intersection_cnt)
-
-                elif cnt_poly.type == 'MultiPolygon' and cnt_poly.is_valid:
-                    for sub_poly in cnt_poly:
-                        if not main_path.disjoint(sub_poly):
-                            intersection_cnt = find_intersection(main_path, sub_poly)
-                            if len(intersection_cnt) > 2:
-                                    coords_cnt.append(intersection_cnt)
-                else:
-                    print("No intersection, type is ", cnt_poly.type)
-
-            # !!!!!!!Возможна ошибка - fabs
-        except Exception as e:
-            print("find_contours func", e)
-    # coords_cnt = np.array(coords_cnt).reshape((-1, 2))
-    return coords_cnt
+    cnt = np.dstack([pix_x, pix_y])[0]
+    # упрощаем массив в раст. 3 пикс.
+    cnt = np.array(simplify_coords_vw(cnt.astype(float), 3.0), dtype=int)[1:-1]
+    cv2.fillPoly(user_mask, [cnt], 255)
+    # cv2.imwrite("user_area.png", user_mask)
+    return user_mask
 
 
-def find_intersection(main_path, poly_path):
-    try:
-        intersect = main_path.intersection(poly_path)
+def find_contours(predicted_mask, start_lat, start_lng,
+                  lat_per_pixel, lng_per_pixel, user_area_image, sub_classes=None, simplify_value=1):
+    predicted_mask = np.array(predicted_mask).T
 
-        if not intersect.is_empty and hasattr(intersect, 'exterior'):
-            intersect = np.array(intersect.exterior.coords[:])
-            if intersect.shape[0] > 2:
-                intersect = intersect.reshape((-1, 2))
-                return np.array(intersect).tolist()
+    layers_count = sub_classes['count']
+    if np.ndim(predicted_mask) == 3:
+        # возврат значения азмеров после транспон.
+        intersection_user_mask = {}
+        for layer_index in range(layers_count):
+            predicted_layer = np.array(predicted_mask[layer_index, :, :], dtype=bool)
+            bool_intersect = np.all([predicted_layer, user_area_image.astype(bool)], axis=0)
+            intersection_user_mask.update({str(layer_index): np.array(bool_intersect, dtype=np.uint8) * 255})
+    else:
+        intersection_user_mask = np.all([predicted_mask.astype(bool), user_area_image.astype(bool)], axis=0)
 
-        return []
-    except Exception as e:
-        print("Find_intersection function error", e)
-        return []
+    # simplify_value = 4
+    result_contours = {}
+    # для каждого слоя маски находим контуры
+    for layer_index in range(layers_count):
+        if sub_classes['count'] == 1:
+            layer_intersection = denoise_image(intersection_user_mask)
+        else:
+            layer_intersection = denoise_image(intersection_user_mask[str(layer_index)])
+
+        contours, hier = cv2.findContours(layer_intersection, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
+        layer_cnt = []
+
+        # Перевод контуров в географич. координаты
+        for cnt in contours:
+            try:
+                if cnt.shape[0] > 0:
+                    cnt = np.array(np.reshape(cnt, (-1, 2)), dtype=float)
+                    # упрощаем контур в значениях для пикселей
+                    cnt = np.array(simplify_coords_vw(cnt, simplify_value), dtype=float)[1:-1]
+                    cnt[:, 0] *= -lat_per_pixel
+                    cnt[:, 0] += start_lat
+
+                    cnt[:, 1] *= lng_per_pixel
+                    cnt[:, 1] += start_lng
+
+                    # cnt = np.unique(cnt, axis=0)
+                    np.resize(cnt, (cnt.shape[0] + 1, cnt.shape[1]))
+                    cnt[-1] = cnt[0]
+                    layer_cnt.append(cnt.tolist())
+            except Exception as e:
+                print("find_contours func", e)
+
+        result_contours.update({sub_classes['names_ru'][layer_index]: layer_cnt})
+    return result_contours
 
 
 def predict_class(image, class_property, model, class_name):
-    crop_size = class_property["input_size"]
-    output_size = class_property["output_size"]
-    delta = class_property["delta"]
+    crop_size = class_property["input_size"]    # размер исходного изображения
+    output_size = class_property["output_size"] # размер изображения для нейронки
+    delta = class_property["delta"]             # порог для поиска объекта
+    sub_classes_count = class_property['sub_classes']['count']
+
     height = image.shape[0]
     width = image.shape[1]
-    mask = np.zeros((height, width), dtype=np.uint8)
-
+    # пустая маска
+    if sub_classes_count == 1:
+        mask = np.zeros((height, width), dtype=np.float32)
+    else:
+        mask = np.zeros((height, width, sub_classes_count), dtype=np.float32)
+    # нормализация входных данных для модели
+    if class_property["normalize_hist"] and class_name != "water":
+        image = normalization_hist(image)
     image = class_property["normalization"](image)
-    for i in range(height // crop_size):
-        for j in range(width // crop_size):
-            cropped_image = image[i*crop_size:i*crop_size+crop_size, j*crop_size:j*crop_size+crop_size]
+
+    half_step = crop_size // 2  # определяем шаг движения окна для модели
+    # скольжение окна
+    for i in range(height // half_step - 1):
+        for j in range(width // half_step - 1):
+            # получаем изображение
+            cropped_image = image[i*half_step:i*half_step+crop_size, j*half_step:j*half_step+crop_size]
+            # изменяем его размер для модели
             cropped_image = cv2.resize(cropped_image, (output_size, output_size))
             cropped_image = cropped_image[np.newaxis, :, :, :]
+            # предсказываем
             pred = model.predict(cropped_image)
-            pred[pred > delta] = 255
-            pred[pred <= delta] = 0
-            pred = np.array(pred, dtype=np.uint8).reshape((output_size, output_size))
-            pred = cv2.resize(pred, (crop_size, crop_size))
-            mask[i*crop_size:i*crop_size+crop_size, j*crop_size:j*crop_size+crop_size] = pred
+            # возвращаем в исходный вид массива
+            if sub_classes_count == 1:
+                pred = pred.reshape((output_size, output_size))
+                # возвращаем исходный размер картинки
+                pred = cv2.resize(pred, (crop_size, crop_size))
+                # Добавляем к результирующей маске
+                mask[i * half_step:i * half_step + crop_size, j * half_step:j * half_step + crop_size] += pred
+            else:
+                pred = pred.reshape((output_size, output_size, sub_classes_count))
+                # pred_resized = np.array((crop_size, crop_size, classes_count))
+                # изменяем размер каждого слоя в исходный
+                for class_index in range(sub_classes_count):
+                    resized_layer = cv2.resize(pred[:, :, class_index], (crop_size, crop_size))
+                    mask[i * half_step:i * half_step + crop_size,
+                         j * half_step:j * half_step + crop_size, class_index] += resized_layer
 
-    return mask
+    # находим среднее значение для маски
+    res_mask = mask / 4
+    # определяем объекты, которые выше порогового значения
+    res_mask[res_mask > delta] = 255
+    res_mask[res_mask <= delta] = 0
+    # возвращаем результат в виде изображения
+    res_mask = np.array(res_mask, dtype=np.uint8)
+    return res_mask
 
 
-def classify(image, class_list, path, lat_lng, class_prop_to_model, models):
+def classify(image, class_list, user_path, lat_lng, class_property, models):
     global graph
     zoom = 18
-    main_path = Polygon(list(map(tuple, path)))
-    center_main_path = list(main_path.centroid.coords[0])
+    user_poly = Polygon(list(map(tuple, user_path)))
+    center_main_path = list(user_poly.centroid.coords[0])
     # Общий реультат для конутров и результатов
     glob_result = {"center": center_main_path}
+
+    # перевод пользовательского контура в изображение - маску
+    user_area_image = create_image_from_coordinates(user_path)
+    user_area_image = user_area_image.T
 
     tile_index_x = lat_lng[0]
     tile_index_y = lat_lng[1]
@@ -258,18 +267,31 @@ def classify(image, class_list, path, lat_lng, class_prop_to_model, models):
     lng_per_pixel = math.fabs(sec_lng - first_lng) / 256
 
     with graph.as_default():
+        # для каждого класса в списке выбранном пользователем
         for class_name in class_list:
-            # results_for_class = {}
             try:
-                class_mask = predict_class(image=image, class_property=class_prop_to_model[class_name],
+                ##### !!!!!!!!!!!!!!!!! ##########
+                if class_name == "water":
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                # находим объекты на изображении
+                class_mask = predict_class(image=image, class_property=class_property[class_name],
                                            model=models[class_name], class_name=class_name)
+                # устраняем шум и пропуски на изображении
+                if class_property[class_name]['sub_classes']['count'] == 1:
+                    class_mask = denoise_fill_image(class_mask)
+                    # cv2.imwrite(f"{class_name}_pred.png", class_mask)
+                else:
+                    for class_index in range(class_property[class_name]['sub_classes']['count']):
+                        class_mask[:, :, class_index] = denoise_fill_image(class_mask[:, :, class_index])
+                        # cv2.imwrite(f"{class_name}_{str(class_index)}_pred.png", class_mask[:, :, class_index])
 
-                class_mask = denoise_fill_image(class_mask)
-                cv2.imwrite(f"{class_name}_pred.png", class_mask)
-
-                coords_of_contours = find_contours(class_mask, first_lat, first_lng, lat_per_pixel, lng_per_pixel, main_path)
+                # находим географические координаты контуров для маски
+                coords_of_contours = find_contours(class_mask, first_lat, first_lng,
+                                                   lat_per_pixel, lng_per_pixel, user_area_image,
+                                                   class_property[class_name]['sub_classes'],
+                                                   class_property[class_name]['simplify_val'])
+                # Добавляем в результат
                 glob_result.update({class_name: coords_of_contours})
-                # results_for_class.update({f'{tile_index_X}_{tile_index_Y}': coords_of_contours})
             except Exception as e:
                 print(f"Can't find contours in class: {class_name}. ", e)
         return glob_result

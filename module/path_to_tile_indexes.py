@@ -56,7 +56,6 @@ def get_indexes(path, zoom=18):
     # print(coords)
     coords.sort(axis=0)
 
-    # ##################################################
     # координаты в id тайлов
     indexes = []
     for latlng in coords:

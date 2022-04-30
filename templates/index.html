@@ -2,9 +2,7 @@
 
 <head>
     <meta charset="UTF-8">
-</head>
-
-<body style="background: #1B1C1D;">
+    <meta name="google-site-verification" content="hjeWWGf5mOtNDEhDhNn-ag5SkrUCZSo_vARopxRi10E" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename = 'css/icons/logo.png') }}" type="image/png" sizes="any">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.css">
@@ -17,208 +15,324 @@
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css?family=Fira+Sans|Open+Sans|Ubuntu|Play|Comfortaa|Fira+Sans+Extra+Condensed|Roboto');
     </style>
+</head>
+
+<body style="background: #1B1C1D;">
+    
 
     <title>LandProber</title>
 
-<!--  МЕНЮ С ЗАПРОСАМИ И АРХИВОМ  -->
-   <div id="logo" class="">UrbanBasis</div>
-    
-    <div id="map" style="height: 100%;">
+    <!--  ЛОГО  -->
+    <div id="logo" class="">
+        <a href="https://urbanbasis.com/" target="_blank" style="
+            color: inherit;
+            -webkit-text-stroke: black 0.2px;
+            text-shadow: 2px 2px black;">
+            UrbanBasis
+        </a>
     </div>
-    
-
-
-    
-<div class="ui icon negative message hidden" style="
-    width: 30%;
-    /* left: 27rem; */
-    margin: 10 auto;
-    z-index: 2;
-">
-  <i class="icon info"></i>
-  <div class="content">
-    <div class="header">
-      Просим прощения! Возникли неполадки на сервере.
-    </div>
-    <p>Попробуйте заново или вернитесь позже.</p>
-      <div class="ui button red fluid">Вернуться</div>
-  </div>
-</div>
-    
-<div id="map_overlay" class="ui centered grid menu" style="
-        position: absolute;
-        max-width: 27rem;
-        max-height: 65rem;
-        /* left: 66px; */
-        margin: auto;
-        margin-left: 69%;
-        top: 10px;
-        right: 10px;
-        /* font-size: 2rem; */
-        /* bottom: 0; */
-        /* color: red; */
-        font-weight: bold;
-        /* overflow-y: scroll; */
-        ">
 
     <!--
+<div class="ui item" style="
+    width: 20%;
+    height: 139px;
+    margin: 0px auto;
+    z-index: 0;
+">
+    <div class="ui attached segment" style="border-radius: 5px 5px 0px 0px;/* height: 82px; */">
+        Этот веб-сайт использует файлы cookie для повышения удобства работы с веб-сайтом.
+        <i class="ui black icon
+              cookie"></i>
+    </div>
+    <div class="ui bottom attached purple buttons">
+        <div class="ui button">Согласен</div>
+        <div class="ui button">Не согласен</div>
+    </div>
+    <div class="ui item"></div>
+
+</div>
+-->
+    
+    <div id="user_popup_inform" class="ui compact orange hidden message" style="
+        width: 240px;
+        position: absolute;
+        z-index: 2;
+        /* margin: 25px 70px; */
+        top: 50px;
+        left: 20px;
+    ">
+        <i class="close icon"></i>
+        <div class="content">
+            <h4 class="header"></h4>
+            <ul class="list">
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </div>
+    <!--  ________________ВЕРХНЕЕ МЕНЮ______________  -->
+    <div id="popup_menu" style="
+    position: absolute;
+    z-index: 5;
+    top: -1px;
+    width: 100%;
+    text-align: center;">
+        <div id="slide_container" class="ui container">
+            <div id="header_menu" class="ui tiny menu transition hidden" style="">
+                {% if login %}
+                <div id="profile" class="item">
+                   {{ user.name }} 
+                </div>
+                {% endif %}
+                <div id="about" class="item">
+                    О нас
+                </div>
+                <div class="right menu">
+                    
+                    <div class="item">
+                        {% if login %}
+                         <a href="/logout">
+                             <div class="ui labeled icon button basic">
+                                <i class="ui sign out alternate black icon"></i>
+                                Выйти
+                             </div>
+                         </a>
+                        {% else %}
+                        <div class="ui purple buttons">
+                            <div id="login_btn" class="ui purple button">Войти</div>
+                            <div id="regist_btn" class="ui purple button">Регистрация</div>
+                        </div>
+                        {% endif %}
+                    </div>
+ 
+                </div>
+            </div>
+            <div id="menu_show" style="
+        background: white;
+        width: 40px;
+        border-radius: 3px 3px 25px 25px;
+        margin: auto;" class=""><i class="ui large icon angle down" style="margin: 0;"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!--  ________________сОДЕРЖИМОЕ ВКЛАДОК МЕНЮ______________  -->
+    <div id="user_menu" class="" style="
+            position: absolute;
+            top: 20%;
+            z-index: 1;
+            width: 100%;">
+        <div class="ui container">
+            <div id="login_content" class="transition hidden">
+                {% if not login %}
+                    {% with log_form=login_form%}
+                        {% include 'login.html' %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+            <div id="regist_content" class="transition hidden">
+                {% if not login %}
+                    {% with regist_form=registration_form%}
+                        {% include 'register.html' %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+            <div id="about_content" class="transition hidden">
+                {% include 'about.html' %}
+            </div>
+            <div id="profile_content" class="transition hidden">
+                {% if login %}
+                    {% with user_data=user %}
+                        {% include 'profile.html' %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!--  ________________ СООБЩЕНИЕ ОБ ОШИБКЕ ______________  -->
+    <div class="ui icon negative message hidden" style="
+            width: fit-content;
+            margin: 0 auto!important;
+            z-index: 5;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 25%;
+            ">
+        <i class="icon info"></i>
+        <div class="content">
+            <div class="header">
+                Просим прощения! Возникли неполадки на сервере.
+            </div>
+            <p>Попробуйте заново или вернитесь позже.</p>
+            <div class="ui button red fluid">Вернуться</div>
+        </div>
+    </div>
+
+    
+    <!--  ________________ ПРАВОЕ ОКНО ______________  -->
+    <div id="map_overlay" class="ui centered grid menu transition visible" style="
+        ">
+
+        <!--
         <div class="ui right menu vertical sidebar visible overlay blue" >
             asdf
         </div>
 -->
-    <div class="row" style="">
-        <div class="center aligned column">
+        <div class="row" style="">
+            <div class="center aligned column">
 
-            <div class="row">
-                <div id="search_container" class="column">
-                    <input id="pac-input" class="controls" type="text" placeholder="Введите адрес" autocomplete="off" style="
-    border-radius: 4px;
-">
-
-                    
-                    
-                <div class="pac-container pac-logo" style="width: 336px; position: absolute; left: 861px; top: 109px; display: none;"></div><div class="pac-container pac-logo" style="display: none; width: 275px; position: absolute; left: 925px; top: 109px;"></div><div class="pac-container pac-logo" style="display: none; width: 346px; position: absolute; left: 893px; top: 64px;"></div></div>
-            </div>
-
-            <div class="ui horizontal divider"></div>
-            <div class="row">
-                <div class="column">
+                <div class="row">
+                    <div id="search_container" class="column">
+                        <input id="pac-input" class="controls" type="text" placeholder="Введите адрес" autocomplete="off" style="border-radius: 4px;">
 
 
-                    <div id="list_of_classes" class="ui vertical labeled icon fluid basic buttons" style="
-    overflow-y: scroll;
-    max-height: 10rem;
-">
-                        <button class="ui button" value="trees">
-                            <i class="tree icon"></i>
-                            Деревья
-                        </button>
+                        <div class="pac-container pac-logo" style="width: 336px; position: absolute; left: 861px; top: 109px; display: none;"></div>
+                        <div class="pac-container pac-logo" style="display: none; width: 275px; position: absolute; left: 925px; top: 109px;"></div>
+                        <div class="pac-container pac-logo" style="display: none; width: 346px; position: absolute; left: 893px; top: 64px;"></div>
+                    </div>
+                </div>
 
-                        <button class="ui button" value="cars">
-                            <i class="car icon"></i>
-                            Автомобили
-                        </button>
+                <div class="ui horizontal divider"></div>
+                <div class="row">
+                    <div class="column">
 
-                        <button class="ui button" value="garage">
-                            <i class="cube icon"></i>
-                            Гаражи
-                        </button>
+                        <div id="list_of_classes" class="ui vertical labeled icon fluid basic buttons" style="overflow-y: scroll; max-height: 10rem;">
+                            <button class="ui button" value="trees">
+                                <i class="tree icon"></i>
+                                Деревья
+                            </button>
 
+                            <button class="ui button" value="cars">
+                                <i class="car icon"></i>
+                                Автомобили
+                            </button>
+
+                            <button class="ui button" value="garage">
+                                <i class="cube icon"></i>
+                                Гаражи
+                            </button>
+
+                            <button class="ui button" value="buildings">
+                                <i class="building icon"></i>
+                                Здания
+                            </button>
+                            
 <!--
-                        <button class="ui button" value="water">
-                            <i class="tint icon"></i>
-                            Вода
-                        </button>
+                            <button class="ui button" value="water">
+                                <i class="tint icon"></i>
+                                Вода
+                            </button>
 -->
-                        <button class="ui button" value="buildings">
-                            <i class="building icon"></i>
-                            Здания
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <button id="submitBtn" class="ui button purple fluid">Получить данные с зонда</button>
-
-        </div>
-
-
-    </div>
-
-    <!--  Резульатты анализа территории  -->
-    <div class="row " style="
-">
-
-        <div class="center aligned column">
-
-            <div class="row">
-
-                <div class="">Архив запросов</div>
-                <div class="ui column segment" style="
-    overflow-y: scroll;
-    max-height: 130px;
-">
-
-                    <div id="archive" class="ui grid middle aligned" style="
-    /* overflow-y: -webkit-paged-x; */
-">
-                        <div class="ui basic item button row" value="   Kazan, Tatarstan, Russia_55.8304307 49.06608060000008 ">
-                            <div class="column"> Kazan, Tatarstan, Russia</div>
-
+                            
+                            <button class="ui button" value="rails">
+                                <i class="pallet icon"></i>
+                                ЖД
+                            </button>
+                            
                         </div>
-
-                        <div class="ui inverted horizontal divider"></div>
-
-                        <div class="ui inverted horizontal divider"></div>
                     </div>
                 </div>
-            </div>
-            <div class="ui hidden horizontal divider"></div>
-            <div class="row">
 
-                <div class="ui basic vertical fluid buttons">
-                    <button class="ui button disabled">Спецпроект: «Деревья Санкт-Петербурга»
-                    </button><button class="ui button disabled">Заказать мониторинг для своей местности
-                    </button>
- <a class="ui button" target="_blank" rel="noopener noreferrer" href="http://urbanbasis.com/feedback" style="
-    color: gray;
-">   Оставить отзыв о сервисе </a>
-
-                </div>
-            </div>
-            <!-- Блок с результатами  -->
-
-
-
-            <div class="ui row grid">
+                <button id="submitBtn" class="ui button purple fluid">Получить данные с зонда</button>
 
             </div>
 
         </div>
-    </div>
-    <div class="ui hidden divider"> </div>
-    <div id="preloader" class=" row">
+
+        <!--  Резульатты анализа территории  -->
+        <div class="row " style="">
+            <div class="center aligned column">
+
+                <div class="row">
+
+                    <h5 class="ui header">Архив запросов</h5>
+                    <div class="ui column segment" style="overflow-y: scroll;max-height: 130px;">
+
+                        <div id="archive" class="ui grid middle aligned" style="">
+                        </div>
+                    </div>
+                </div>
+                <div class="ui hidden horizontal divider"></div>
+                <div class="row">
+
+                    <div class="ui basic vertical fluid buttons">
+                        <button class="ui button disabled">Спецпроект: «Деревья Санкт-Петербурга»
+                        </button><button class="ui button disabled">Заказать мониторинг для своей местности
+                        </button>
+                        <a class="ui button" target="_blank" rel="noopener noreferrer" href="http://urbanbasis.com/feedback" style="color: gray;"> Оставить отзыв о сервисе </a>
+
+                    </div>
+                </div>
+                <!-- Блок с результатами  -->
+
+                <div class="ui row grid">
+
+                </div>
+
+            </div>
+        </div>
+        <div class="ui hidden divider"> </div>
+        <div id="preloader" class=" row">
             <div class="row">
                 <div class="center aligned column">
                     <div id="loader"></div>
                 </div>
             </div>
-        
+
             <div id="welcome" class="center aligned column" style="width: unset!important;">
                 <!--      убираем после 1 запроса      -->
-                <h5>Космический аппарат готов к работе</h5>
+                <h5 class="ui header">Космический аппарат готов к работе</h5>
                 <img class="ui centered small image" src="/static/css/icons/sat.png">
-                <h4>Для начала работы с аппаратом укажите новый квадрат поиска или выберите из архива</h4>
-            </div>  
-        
-<!--     Добавляем после 1 запроса   -->
-        
-        
+                <h4 class="ui header">Для начала работы с аппаратом укажите новый квадрат поиска или выберите из архива</h4>
+            </div>
+
+            <!--     Добавляем после 1 запроса   -->
+
+
+        </div>
+
     </div>
     
-</div>
     {% block shared %}
-
     {% endblock %}
+
     
-<!--  Кнопки выделения территории  -->
-    <div class="ui centered grid" style="bottom: 2rem;position: absolute;width: 100%;">
-    <div id="select_tool" class="ui circular icon green button">Выделить область</div>
-    <div id="rm_select" class="ui circular icon yellow button" style="display: none;">Удалить область</div>
+    
+    <!--  Кнопки выделения территории  -->
+    <div class="ui centered grid" style="bottom: 2rem; z-index: 1; position: absolute;width: 100%;">
+        <div id="select_tool" class="ui circular icon purple button">Выделить область</div>
+        <div id="rm_select" class="ui circular icon red button" style="display: none;">Удалить область</div>
+    </div>
 
-</div>
-
+    <!--  Основная карта  -->
+    <div id="map" style="height: 100%;">
+    </div>
+    
     <script src="https://apis.google.com/js/platform.js" async="" defer="" gapi_processed="true"></script>
     <script>
         //$('.ui.sidebar.bottom').sidebar({context: '#'})menuContainer
     </script>
 
 </body>
-<script src="https://apis.google.com/js/platform.js" async defer></script>
-    {% if not data %}
-        <script  src="{{ url_for('static', filename = 'js/script.js') }}"></script>
-    {% endif %}
-    <script  src="{{ url_for('static', filename = 'js/UI_events.js') }}"></script>
-    <script  src="{{ url_for('static', filename = 'js/select_tool.js') }}"></script>
     
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    {% if not data %}
+    <script src="{{ url_for('static', filename = 'js/script.js') }}"></script>
+    {% endif %}
+    
+    <script src="{{ url_for('static', filename = 'js/UI_events.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/select_tool.js') }}"></script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-139330872-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-139330872-1');
+    </script>
+
 </html>

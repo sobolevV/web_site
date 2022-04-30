@@ -1,0 +1,32 @@
+
+<div class="ui segment" style="width: 50%;margin: auto;">
+    
+    <form id="regist_form" class="ui form" method="post" action="/registration">
+        {{ regist_form.hidden_tag() }}
+        <div class="field">
+            <label>Имя - Логин</label>
+            {{ regist_form.name }}
+<!--            <input type="text" name="name" placeholder="Имя - Логин">-->
+        </div>
+        <div class="field">
+            <label>Почта</label>
+            {{ regist_form.mail }}
+<!--            <input type="email" name="mail" placeholder="Электронная почта">-->
+        </div>
+        <div class="field">
+            <label>Пароль</label>
+            {{ regist_form.password }}
+<!--            <input type="password" name="password1" placeholder="Пароль">-->
+            <div class="ui pointing basic tiny label">
+                Минимальная длина пароля 6 символов
+            </div>
+        </div>
+        <div class="field">
+            <label>Повторите пароль</label>
+            {{ regist_form.confirm }}
+<!--            <input type="password" name="password2" placeholder="Пароль">-->
+        </div>
+    </form>
+    
+        <button id="regist_post" class="ui purple button">Войти</button>
+</div>

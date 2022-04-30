@@ -91,7 +91,7 @@ def get_map(min_x, max_x, min_y, max_y, zoom, neighbourhood=None, name=None, dir
             image[img.size[0] * ny: img.size[0] * ny + size,
                   img.size[0] * nx: img.size[0] * nx + size] = np.asarray(img, dtype=np.uint8)
 
-    cv2.imwrite("test.png", image)
+    # cv2.imwrite("test.png", image)
     # отправляем изображение и верх. лев. индекс тайла
     return image
 
@@ -100,17 +100,20 @@ def get_my_map(combin, zoom):
     # входные данные
     size = 256
     combin = np.array(combin).reshape((-1, 2))
+    # размер картинки с запасом 128 пикс.
     width = (np.max(combin[:, 0]) - np.min(combin[:, 0]) + 1) * size
     height = (np.max(combin[:, 1]) - np.min(combin[:, 1]) + 1) * size
-    # print(height, width)
+    # пустая картинка
     image = np.zeros((height, width, 3), dtype=np.uint8)
     max_index_x = width // size
+    # счетчик по Y
     index_y = 0
+    # Получить каждый тайл в комбинации
     for index, x_y in enumerate(combin):
         image_small = get_one_tile(x_y[0], x_y[1], zoom)
         sleep_timer = 3
         while image_small is None:
-            print("image none")
+            # print("image none")
             time.sleep(sleep_timer)
             sleep_timer += 1
             image_small = get_one_tile(x_y[0], x_y[1], zoom)
@@ -121,5 +124,5 @@ def get_my_map(combin, zoom):
         if (index + 1) % max_index_x == 0 and index > 0:
             index_y += 1
 
-    cv2.imwrite("test.png", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    # cv2.imwrite("test.png", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     return image
